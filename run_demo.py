@@ -16,8 +16,6 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')  # 非交互后端
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-from matplotlib.patches import FancyArrowPatch
 from matplotlib.font_manager import FontProperties
 from shapely.geometry import Polygon as ShapelyPolygon
 import imageio.v2 as imageio
@@ -26,7 +24,7 @@ import imageio.v2 as imageio
 ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, ROOT)
 
-from planner.hybrid_a_star import hybrid_a_star_planning, Config, LAST_ITER_NUM, LAST_SEARCH_TIME
+from planner.hybrid_a_star import hybrid_a_star_planning, Config
 from planner.collision_lookup import CollisionLookup
 
 # ── 中文字体 ──────────────────────────────────────
@@ -40,10 +38,12 @@ FONT_PROP_SMALL = FontProperties(fname=FONT_PATH, size=9)
 FONT_PROP_LEGEND = FontProperties(fname=FONT_PATH, size=10)
 
 # ── 车辆几何参数 ─────────────────────────────────
-VEHICLE_WB = 3.5
 VEHICLE_W = 3.2
 VEHICLE_LF = 4.51
 VEHICLE_LB = 1.01
+
+# ── 障碍物膨胀半径 ─────────────────────────────────
+OBSTACLE_INFLATION = 0.15  # 米
 
 
 # ===========================================================================
@@ -67,7 +67,12 @@ def load_inputs(input_dir):
 # ===========================================================================
 
 def build_grid_map(map_cfg, obstacles):
-    """将多边形障碍物光栅化到二值栅格地图 (0=障碍, 1=空闲)"""
+    """将多边形障碍物光栅化到二值栅格地图 (0=障碍, 1=空闲)
+
+    对每个障碍物施加 OBSTACLE_INFLATION 膨胀半径，避免碰撞漏检。
+    """
+    from shapely.geometry import Point
+
     res = map_cfg['resolution']
     x_min, y_min = map_cfg['x_min'], map_cfg['y_min']
     x_max, y_max = map_cfg['x_max'], map_cfg['y_max']
@@ -79,6 +84,9 @@ def build_grid_map(map_cfg, obstacles):
     for obs in obstacles['obstacles']:
         verts = obs['vertices']
         poly = ShapelyPolygon(verts)
+        # 施加膨胀半径
+        if OBSTACLE_INFLATION > 0:
+            poly = poly.buffer(OBSTACLE_INFLATION)
         # 获取轴对齐包围盒
         minx_o, miny_o, maxx_o, maxy_o = poly.bounds
         ix_min = max(0, int(math.floor((minx_o - x_min) / res)))
@@ -90,12 +98,12 @@ def build_grid_map(map_cfg, obstacles):
             for ix in range(ix_min, ix_max + 1):
                 wx = x_min + ix * res
                 wy = y_min + iy * res
-                from shapely.geometry import Point
                 if poly.contains(Point(wx, wy)):
                     grid[iy, ix] = 0
 
     print(f"栅格地图构建完成: {width}x{height}, 障碍像素占比: "
-          f"{(grid == 0).sum() / grid.size * 100:.1f}%")
+          f"{(grid == 0).sum() / grid.size * 100:.1f}%"
+          f" (膨胀半径: {OBSTACLE_INFLATION}m)")
     return grid
 
 
@@ -183,33 +191,6 @@ def draw_vehicle(ax, x, y, yaw, color='royalblue', alpha=0.7, label=None):
                 arrowprops=dict(arrowstyle='->', color='white', lw=1.8), zorder=6)
 
 
-def draw_parking_slot(ax, slot):
-    """绘制停车位"""
-    cx, cy = slot['center']
-    sw, sh = slot['size']
-    heading = math.radians(slot['heading_deg'])
-
-    corners_local = np.array([
-        [sw / 2, sh / 2],
-        [sw / 2, -sh / 2],
-        [-sw / 2, -sh / 2],
-        [-sw / 2, sh / 2],
-    ])
-    cos_h, sin_h = math.cos(heading), math.sin(heading)
-    corners_world = np.zeros_like(corners_local)
-    for i, (lx, ly) in enumerate(corners_local):
-        corners_world[i, 0] = cx + lx * cos_h - ly * sin_h
-        corners_world[i, 1] = cy + lx * sin_h + ly * cos_h
-
-    poly = plt.Polygon(corners_world, closed=True, facecolor='none',
-                        edgecolor='lime', linewidth=2.5, linestyle='--',
-                        label='目标车位', zorder=4)
-    ax.add_patch(poly)
-
-    # P 标记
-    ax.text(cx, cy, 'P', fontsize=18, fontweight='bold', color='lime',
-            ha='center', va='center', zorder=7,
-            fontproperties=FONT_PROP)
 
 
 def setup_plot(ax, map_cfg, obstacles, scenario, title, grid_map=None):
@@ -231,10 +212,11 @@ def setup_plot(ax, map_cfg, obstacles, scenario, title, grid_map=None):
         '施工区域': '#FF8C00',
         '植被区域': '#228B22',
         '停放车辆A': '#4682B4',
-        '停放车辆B': '#4682B4',
-        '停放车辆C': '#4682B4',
         '废弃物堆': '#696969',
         '临时围栏': '#CD853F',
+        '车位左栏杆': '#708090',
+        '车位右栏杆': '#708090',
+        '车位后栏杆': '#708090',
     }
     for obs in obstacles['obstacles']:
         verts = obs['vertices']
@@ -255,9 +237,6 @@ def setup_plot(ax, map_cfg, obstacles, scenario, title, grid_map=None):
             ax.text(cx, cy, label, fontsize=7, color='white',
                     ha='center', va='center', fontproperties=FONT_PROP_SMALL,
                     fontweight='bold', zorder=3)
-
-    # 停车位
-    draw_parking_slot(ax, scenario['parking_slot'])
 
     ax.set_xlim(x_min - 1, x_max + 1)
     ax.set_ylim(y_min - 1, y_max + 1)
