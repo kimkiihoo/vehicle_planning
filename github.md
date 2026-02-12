@@ -5,10 +5,10 @@ git push                            # 3. 上传：推送到 GitHub
 
 版本管理
 git add .                           # 1. 收集：将所有修改添加到暂存区
-git commit -m "修改绘图代码，删除无用程序"        # 2. 存档：生成新版本
+git commit -m "修改虚拟环境"        # 2. 存档：生成新版本
 git log                             # 3.查看历史，确认最新 commit 没问题
-git tag -a v1.0 -m "修改绘图代码，删除无用程序"       # 4.给“当前的最新提交”贴上标签
-git push origin v1.0                # 5.单独推送这个标签到远程
+git tag -a v1.4 -m "修改虚拟环境"       # 4.给“当前的最新提交”贴上标签
+git push origin v1.4                # 5.单独推送这个标签到远程
 
 版本回退
 git log --oneline
