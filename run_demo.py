@@ -26,6 +26,7 @@ sys.path.insert(0, ROOT)
 
 from planner.hybrid_a_star import hybrid_a_star_planning, Config
 from planner.collision_lookup import CollisionLookup
+from optimizer.recursive_mpc import RecursiveMPCOptimizer
 
 # ── 中文字体 ──────────────────────────────────────
 FONT_PATH = "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
@@ -252,8 +253,9 @@ def setup_plot(ax, map_cfg, obstacles, scenario, title, grid_map=None):
 # ===========================================================================
 
 def save_output_jpg(path, map_cfg, obstacles, scenario, grid_map,
-                    path_x, path_y, path_yaw, directions):
-    """保存规划结果静态图"""
+                    path_x, path_y, path_yaw, directions,
+                    orig_path=None):
+    """保存规划结果静态图（orig_path 为优化前轨迹，用于对比显示）"""
     fig, ax = plt.subplots(1, 1, figsize=(16, 10), dpi=150)
     fig.patch.set_facecolor('#1a1a2e')
     ax.set_facecolor('#16213e')
@@ -280,6 +282,12 @@ def save_output_jpg(path, map_cfg, obstacles, scenario, grid_map,
     # 方向图例
     ax.plot([], [], color='#00ff88', linewidth=2.5, label='前进轨迹')
     ax.plot([], [], color='#ff6b6b', linewidth=2.5, label='倒车轨迹')
+
+    # 优化前轨迹（白色虚线对比）
+    if orig_path is not None:
+        ox, oy = orig_path
+        ax.plot(ox, oy, color='#ffffff', linewidth=1.0, alpha=0.35,
+                linestyle='--', zorder=2, label='优化前轨迹')
 
     legend = ax.legend(loc='upper left', prop=FONT_PROP_LEGEND,
                        facecolor='#1a1a2e', edgecolor='white',
@@ -402,7 +410,7 @@ def main():
     os.makedirs(output_dir, exist_ok=True)
 
     # 1. 加载输入
-    print("\n[1/6] 加载输入数据...")
+    print("\n[1/7] 加载输入数据...")
     map_cfg, obstacles, scenario = load_inputs(input_dir)
 
     start = [scenario['start']['x'],
@@ -419,11 +427,11 @@ def main():
     print(f"  停车位: {scenario['parking_slot']['type']}")
 
     # 2. 构建栅格地图
-    print("\n[2/6] 构建栅格地图...")
+    print("\n[2/7] 构建栅格地图...")
     grid_map = build_grid_map(map_cfg, obstacles)
 
     # 3. 构建碰撞查找表
-    print("\n[3/6] 构建碰撞查找表...")
+    print("\n[3/7] 构建碰撞查找表...")
     collision_lookup = CollisionLookup(
         mask=grid_map,
         resolution=map_cfg['resolution'],
@@ -432,7 +440,7 @@ def main():
     )
 
     # 4. 规划
-    print("\n[4/6] 运行混合A*路径规划...")
+    print("\n[4/7] 运行混合A*路径规划...")
     config = Config(
         x_min=map_cfg['x_min'],
         y_min=map_cfg['y_min'],
@@ -463,36 +471,60 @@ def main():
 
     print(f"\n✅ 规划成功！路径点数: {len(path.xlist)}")
 
-    # 5. 计算曲率 & 输出
-    print("\n[5/6] 保存结果...")
-    curvatures = calculate_curvatures(path.xlist, path.ylist, path.yawlist)
+    # 保存原始轨迹用于对比
+    orig_x = list(path.xlist)
+    orig_y = list(path.ylist)
+
+    # 5. 递归MPC轨迹优化
+    print("\n[5/7] 递归MPC轨迹优化...")
+    optimizer = RecursiveMPCOptimizer({
+        'horizon': 40,
+        'overlap': 15,
+        'w_reference': 1.0,
+        'w_smooth': 60.0,
+        'w_jerk': 80.0,
+        'w_obstacle': 500.0,
+        'obstacle_margin': 2.0,
+        'max_iter': 8,
+        'fix_start_n': 5,
+        'fix_end_n': 5,
+    })
+    opt_x, opt_y, opt_yaw = optimizer.optimize(
+        path.xlist, path.ylist, path.yawlist, path.directionlist,
+        grid_map, map_cfg
+    )
+
+    # 6. 计算曲率 & 输出
+    print("\n[6/7] 保存结果...")
+    curvatures = calculate_curvatures(opt_x, opt_y, opt_yaw)
 
     import planner.hybrid_a_star as ha
     save_output_json(
         os.path.join(output_dir, 'output.json'),
-        path.xlist, path.ylist, path.yawlist, path.directionlist, curvatures,
+        opt_x, opt_y, opt_yaw, path.directionlist, curvatures,
         ha.LAST_ITER_NUM, ha.LAST_SEARCH_TIME
     )
 
     save_output_jpg(
         os.path.join(output_dir, 'output.jpg'),
         map_cfg, obstacles, scenario, grid_map,
-        path.xlist, path.ylist, path.yawlist, path.directionlist
+        opt_x, opt_y, opt_yaw, path.directionlist,
+        orig_path=(orig_x, orig_y)
     )
 
-    # 6. GIF
-    print("\n[6/6] 生成动画...")
+    # 7. GIF
+    print("\n[7/7] 生成动画...")
     save_output_gif(
         os.path.join(output_dir, 'output.gif'),
         map_cfg, obstacles, scenario, grid_map,
-        path.xlist, path.ylist, path.yawlist, path.directionlist
+        opt_x, opt_y, opt_yaw, path.directionlist
     )
 
     print("\n" + "=" * 60)
     print("  所有输出已保存至 output/ 目录:")
-    print("    output/output.json  — 轨迹数据")
-    print("    output/output.jpg   — 静态规划图")
-    print("    output/output.gif   — 规划动画")
+    print("    output/output.json  — 轨迹数据（优化后）")
+    print("    output/output.jpg   — 静态规划图（含优化前后对比）")
+    print("    output/output.gif   — 规划动画（优化后轨迹）")
     print("=" * 60)
 
 
