@@ -21,8 +21,8 @@ LB = 1.01  # 后轴到车尾的距离
 MAX_STEER = np.deg2rad(34)  # 最大转向角 [rad]
 
 # 规划成本参数
-SB_COST = 25.0  # 切换方向惩罚
-BACK_COST = 100.0  # 倒车惩罚
+SB_COST = 150.0  # 切换方向惩罚（高值避免频繁换向）
+BACK_COST = 500.0  # 倒车惩罚（高值使搜索阶段尽量避免倒车）
 STEER_CHANGE_COST = 10.0  # 转向角变化惩罚
 STEER_COST = 25.0  # 转向角惩罚
 H_COST = 250.0  # 启发式成本（泊车场景）

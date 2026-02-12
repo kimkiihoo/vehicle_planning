@@ -454,7 +454,7 @@ def main():
         x_min=map_cfg['x_min'],
         y_min=map_cfg['y_min'],
         use_dijkstra=True,
-        rs_dist=50
+        rs_dist=15
     )
 
     if path is None:

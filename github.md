@@ -12,7 +12,7 @@ git push origin v1.0                # 5.单独推送这个标签到远程
 
 版本回退
 git log --oneline
-git clone -b 8c1963b git@github.com:kimkiihoo/nmpc-pinn.git  #-b 后面可以是分支名，也可以是 Tag（标签）名。
+git clone -b 8c1963b git@github.com:kimkiihoo/vehicle_planning.git  #-b 后面可以是分支名，也可以是 Tag（标签）名。
 
 当场回退
 git log --oneline                   # 查看简略历史，找到版本号 (如 a1b2c3)

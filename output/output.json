@@ -1,9 +1,9 @@
 {
   "planning_info": {
     "algorithm": "Hybrid A* + Reeds-Shepp",
-    "iterations": 239,
-    "search_time_sec": 6.05,
-    "path_length": 207
+    "iterations": 1064,
+    "search_time_sec": 17.708,
+    "path_length": 223
   },
   "trajectory": [
     {
@@ -505,1131 +505,1131 @@
       "index": 55,
       "x": 30.5866,
       "y": 31.1048,
-      "yaw_rad": 0.7505,
-      "yaw_deg": 43.0,
+      "yaw_rad": 0.5745,
+      "yaw_deg": 32.91,
       "direction": "前进",
-      "curvature": 0.079632
+      "curvature": -0.096321
     },
     {
       "index": 56,
-      "x": 30.9523,
-      "y": 31.4458,
-      "yaw_rad": 0.8301,
-      "yaw_deg": 47.56,
+      "x": 31.0063,
+      "y": 31.3765,
+      "yaw_rad": 0.4781,
+      "yaw_deg": 27.39,
       "direction": "前进",
-      "curvature": 0.079632
+      "curvature": -0.096321
     },
     {
       "index": 57,
-      "x": 31.2897,
-      "y": 31.8148,
-      "yaw_rad": 0.9098,
-      "yaw_deg": 52.13,
+      "x": 31.4503,
+      "y": 31.6066,
+      "yaw_rad": 0.3817,
+      "yaw_deg": 21.87,
       "direction": "前进",
-      "curvature": 0.079632
+      "curvature": -0.096321
     },
     {
       "index": 58,
-      "x": 31.5966,
-      "y": 32.2095,
-      "yaw_rad": 0.9894,
-      "yaw_deg": 56.69,
+      "x": 31.9143,
+      "y": 31.7928,
+      "yaw_rad": 0.2854,
+      "yaw_deg": 16.35,
       "direction": "前进",
-      "curvature": 0.079632
+      "curvature": -0.096321
     },
     {
       "index": 59,
-      "x": 31.8712,
-      "y": 32.6274,
-      "yaw_rad": 1.0691,
-      "yaw_deg": 61.25,
+      "x": 32.394,
+      "y": 31.9336,
+      "yaw_rad": 0.189,
+      "yaw_deg": 10.83,
       "direction": "前进",
-      "curvature": 0.079632
+      "curvature": -0.096321
     },
     {
       "index": 60,
-      "x": 32.1117,
-      "y": 33.0657,
-      "yaw_rad": 1.1487,
-      "yaw_deg": 65.82,
+      "x": 32.8851,
+      "y": 32.0275,
+      "yaw_rad": 0.0927,
+      "yaw_deg": 5.31,
+      "direction": "前进",
+      "curvature": -0.096321
+    },
+    {
+      "index": 61,
+      "x": 33.383,
+      "y": 32.0738,
+      "yaw_rad": -0.0037,
+      "yaw_deg": -0.21,
+      "direction": "前进",
+      "curvature": -0.096321
+    },
+    {
+      "index": 62,
+      "x": 33.883,
+      "y": 32.072,
+      "yaw_rad": -0.1001,
+      "yaw_deg": -5.73,
+      "direction": "前进",
+      "curvature": -0.096321
+    },
+    {
+      "index": 63,
+      "x": 34.3805,
+      "y": 32.022,
+      "yaw_rad": -0.1964,
+      "yaw_deg": -11.25,
+      "direction": "前进",
+      "curvature": -0.096321
+    },
+    {
+      "index": 64,
+      "x": 34.8709,
+      "y": 31.9244,
+      "yaw_rad": -0.2928,
+      "yaw_deg": -16.77,
+      "direction": "前进",
+      "curvature": -0.096321
+    },
+    {
+      "index": 65,
+      "x": 35.3496,
+      "y": 31.7801,
+      "yaw_rad": -0.3891,
+      "yaw_deg": -22.3,
+      "direction": "前进",
+      "curvature": -0.096321
+    },
+    {
+      "index": 66,
+      "x": 35.8122,
+      "y": 31.5904,
+      "yaw_rad": -0.4855,
+      "yaw_deg": -27.82,
+      "direction": "前进",
+      "curvature": 1.997679
+    },
+    {
+      "index": 67,
+      "x": 35.37,
+      "y": 31.8238,
+      "yaw_rad": -0.4976,
+      "yaw_deg": -28.51,
+      "direction": "倒车",
+      "curvature": -0.012139
+    },
+    {
+      "index": 68,
+      "x": 34.9306,
+      "y": 32.0624,
+      "yaw_rad": -0.5098,
+      "yaw_deg": -29.21,
+      "direction": "倒车",
+      "curvature": -0.012139
+    },
+    {
+      "index": 69,
+      "x": 34.4942,
+      "y": 32.3064,
+      "yaw_rad": -0.5219,
+      "yaw_deg": -29.9,
+      "direction": "倒车",
+      "curvature": -0.012139
+    },
+    {
+      "index": 70,
+      "x": 34.0608,
+      "y": 32.5557,
+      "yaw_rad": -0.534,
+      "yaw_deg": -30.6,
+      "direction": "倒车",
+      "curvature": -0.012139
+    },
+    {
+      "index": 71,
+      "x": 33.6304,
+      "y": 32.8102,
+      "yaw_rad": -0.5462,
+      "yaw_deg": -31.29,
+      "direction": "倒车",
+      "curvature": -0.012139
+    },
+    {
+      "index": 72,
+      "x": 33.2031,
+      "y": 33.0699,
+      "yaw_rad": -0.5583,
+      "yaw_deg": -31.99,
+      "direction": "倒车",
+      "curvature": 1.999963
+    },
+    {
+      "index": 73,
+      "x": 33.6272,
+      "y": 32.805,
+      "yaw_rad": -0.6547,
+      "yaw_deg": -37.51,
+      "direction": "前进",
+      "curvature": -0.096321
+    },
+    {
+      "index": 74,
+      "x": 34.0238,
+      "y": 32.5006,
+      "yaw_rad": -0.751,
+      "yaw_deg": -43.03,
+      "direction": "前进",
+      "curvature": -0.096321
+    },
+    {
+      "index": 75,
+      "x": 34.3893,
+      "y": 32.1594,
+      "yaw_rad": -0.8474,
+      "yaw_deg": -48.55,
+      "direction": "前进",
+      "curvature": -0.096321
+    },
+    {
+      "index": 76,
+      "x": 34.7203,
+      "y": 31.7846,
+      "yaw_rad": -0.9438,
+      "yaw_deg": -54.07,
+      "direction": "前进",
+      "curvature": -0.096321
+    },
+    {
+      "index": 77,
+      "x": 35.0137,
+      "y": 31.3797,
+      "yaw_rad": -1.0401,
+      "yaw_deg": -59.59,
+      "direction": "前进",
+      "curvature": -0.096321
+    },
+    {
+      "index": 78,
+      "x": 35.2667,
+      "y": 30.9485,
+      "yaw_rad": -1.1365,
+      "yaw_deg": -65.12,
+      "direction": "前进",
+      "curvature": -0.096321
+    },
+    {
+      "index": 79,
+      "x": 35.4771,
+      "y": 30.4949,
+      "yaw_rad": -1.1243,
+      "yaw_deg": -64.42,
+      "direction": "前进",
+      "curvature": 0.012139
+    },
+    {
+      "index": 80,
+      "x": 35.693,
+      "y": 30.0439,
+      "yaw_rad": -1.1122,
+      "yaw_deg": -63.72,
+      "direction": "前进",
+      "curvature": 0.012139
+    },
+    {
+      "index": 81,
+      "x": 35.9144,
+      "y": 29.5956,
+      "yaw_rad": -1.1001,
+      "yaw_deg": -63.03,
+      "direction": "前进",
+      "curvature": 0.012139
+    },
+    {
+      "index": 82,
+      "x": 36.1411,
+      "y": 29.15,
+      "yaw_rad": -1.0879,
+      "yaw_deg": -62.33,
+      "direction": "前进",
+      "curvature": 0.012139
+    },
+    {
+      "index": 83,
+      "x": 36.3733,
+      "y": 28.7071,
+      "yaw_rad": -1.0758,
+      "yaw_deg": -61.64,
+      "direction": "前进",
+      "curvature": 0.012139
+    },
+    {
+      "index": 84,
+      "x": 36.6108,
+      "y": 28.2671,
+      "yaw_rad": -1.0636,
+      "yaw_deg": -60.94,
+      "direction": "前进",
+      "curvature": 0.012139
+    },
+    {
+      "index": 85,
+      "x": 36.8537,
+      "y": 27.8301,
+      "yaw_rad": -1.0515,
+      "yaw_deg": -60.25,
+      "direction": "前进",
+      "curvature": 0.012139
+    },
+    {
+      "index": 86,
+      "x": 37.1018,
+      "y": 27.396,
+      "yaw_rad": -1.0394,
+      "yaw_deg": -59.55,
+      "direction": "前进",
+      "curvature": 0.012139
+    },
+    {
+      "index": 87,
+      "x": 37.3552,
+      "y": 26.965,
+      "yaw_rad": -1.0272,
+      "yaw_deg": -58.86,
+      "direction": "前进",
+      "curvature": 0.012139
+    },
+    {
+      "index": 88,
+      "x": 37.6138,
+      "y": 26.537,
+      "yaw_rad": -1.0151,
+      "yaw_deg": -58.16,
+      "direction": "前进",
+      "curvature": 0.012139
+    },
+    {
+      "index": 89,
+      "x": 37.8776,
+      "y": 26.1123,
+      "yaw_rad": -1.0029,
+      "yaw_deg": -57.46,
+      "direction": "前进",
+      "curvature": 0.012139
+    },
+    {
+      "index": 90,
+      "x": 38.1465,
+      "y": 25.6907,
+      "yaw_rad": -0.9908,
+      "yaw_deg": -56.77,
+      "direction": "前进",
+      "curvature": 0.012139
+    },
+    {
+      "index": 91,
+      "x": 38.4205,
+      "y": 25.2725,
+      "yaw_rad": -0.9663,
+      "yaw_deg": -55.37,
+      "direction": "前进",
+      "curvature": 0.024455
+    },
+    {
+      "index": 92,
+      "x": 38.7047,
+      "y": 24.8611,
+      "yaw_rad": -0.9419,
+      "yaw_deg": -53.97,
+      "direction": "前进",
+      "curvature": 0.024455
+    },
+    {
+      "index": 93,
+      "x": 38.9988,
+      "y": 24.4568,
+      "yaw_rad": -0.9174,
+      "yaw_deg": -52.56,
+      "direction": "前进",
+      "curvature": 0.024455
+    },
+    {
+      "index": 94,
+      "x": 39.3027,
+      "y": 24.0597,
+      "yaw_rad": -0.893,
+      "yaw_deg": -51.16,
+      "direction": "前进",
+      "curvature": 0.024455
+    },
+    {
+      "index": 95,
+      "x": 39.6163,
+      "y": 23.6703,
+      "yaw_rad": -0.8685,
+      "yaw_deg": -49.76,
+      "direction": "前进",
+      "curvature": 0.024455
+    },
+    {
+      "index": 96,
+      "x": 39.9393,
+      "y": 23.2886,
+      "yaw_rad": -0.8441,
+      "yaw_deg": -48.36,
+      "direction": "前进",
+      "curvature": 0.024455
+    },
+    {
+      "index": 97,
+      "x": 40.2715,
+      "y": 22.9149,
+      "yaw_rad": -0.7644,
+      "yaw_deg": -43.8,
       "direction": "前进",
       "curvature": 0.079632
     },
     {
-      "index": 61,
-      "x": 32.3165,
-      "y": 33.5219,
-      "yaw_rad": 1.1991,
-      "yaw_deg": 68.7,
-      "direction": "前进",
-      "curvature": 0.050383
-    },
-    {
-      "index": 62,
-      "x": 32.4981,
-      "y": 33.9877,
-      "yaw_rad": 1.2495,
-      "yaw_deg": 71.59,
-      "direction": "前进",
-      "curvature": 0.050383
-    },
-    {
-      "index": 63,
-      "x": 32.656,
-      "y": 34.4621,
-      "yaw_rad": 1.2999,
-      "yaw_deg": 74.48,
-      "direction": "前进",
-      "curvature": 0.050383
-    },
-    {
-      "index": 64,
-      "x": 32.7898,
-      "y": 34.9439,
-      "yaw_rad": 1.3503,
-      "yaw_deg": 77.37,
-      "direction": "前进",
-      "curvature": 0.050383
-    },
-    {
-      "index": 65,
-      "x": 32.8991,
-      "y": 35.4318,
-      "yaw_rad": 1.4007,
-      "yaw_deg": 80.25,
-      "direction": "前进",
-      "curvature": 0.050383
-    },
-    {
-      "index": 66,
-      "x": 32.9838,
-      "y": 35.9246,
-      "yaw_rad": 1.4511,
-      "yaw_deg": 83.14,
-      "direction": "前进",
-      "curvature": -1.999365
-    },
-    {
-      "index": 67,
-      "x": 32.9241,
-      "y": 35.4282,
-      "yaw_rad": 1.5015,
-      "yaw_deg": 86.03,
-      "direction": "倒车",
-      "curvature": 0.050383
-    },
-    {
-      "index": 68,
-      "x": 32.8894,
-      "y": 34.9294,
-      "yaw_rad": 1.5518,
-      "yaw_deg": 88.91,
-      "direction": "倒车",
-      "curvature": 0.050383
-    },
-    {
-      "index": 69,
-      "x": 32.8799,
-      "y": 34.4294,
-      "yaw_rad": 1.6022,
-      "yaw_deg": 91.8,
-      "direction": "倒车",
-      "curvature": 0.050383
-    },
-    {
-      "index": 70,
-      "x": 32.8957,
-      "y": 33.9297,
-      "yaw_rad": 1.6526,
-      "yaw_deg": 94.69,
-      "direction": "倒车",
-      "curvature": 0.050383
-    },
-    {
-      "index": 71,
-      "x": 32.9365,
-      "y": 33.4314,
-      "yaw_rad": 1.703,
-      "yaw_deg": 97.57,
-      "direction": "倒车",
-      "curvature": 0.050383
-    },
-    {
-      "index": 72,
-      "x": 33.0024,
-      "y": 32.9357,
-      "yaw_rad": 1.7534,
-      "yaw_deg": 100.46,
-      "direction": "倒车",
-      "curvature": 0.050383
-    },
-    {
-      "index": 73,
-      "x": 33.0932,
-      "y": 32.444,
-      "yaw_rad": 1.7655,
-      "yaw_deg": 101.16,
-      "direction": "倒车",
-      "curvature": 0.012139
-    },
-    {
-      "index": 74,
-      "x": 33.19,
-      "y": 31.9535,
-      "yaw_rad": 1.7777,
-      "yaw_deg": 101.85,
-      "direction": "倒车",
-      "curvature": 0.012139
-    },
-    {
-      "index": 75,
-      "x": 33.2927,
-      "y": 31.4642,
-      "yaw_rad": 1.7898,
-      "yaw_deg": 102.55,
-      "direction": "倒车",
-      "curvature": 0.012139
-    },
-    {
-      "index": 76,
-      "x": 33.4013,
-      "y": 30.9761,
-      "yaw_rad": 1.8019,
-      "yaw_deg": 103.24,
-      "direction": "倒车",
-      "curvature": 0.012139
-    },
-    {
-      "index": 77,
-      "x": 33.5159,
-      "y": 30.4894,
-      "yaw_rad": 1.8141,
-      "yaw_deg": 103.94,
-      "direction": "倒车",
-      "curvature": 0.012139
-    },
-    {
-      "index": 78,
-      "x": 33.6363,
-      "y": 30.0041,
-      "yaw_rad": 1.8262,
-      "yaw_deg": 104.64,
-      "direction": "倒车",
-      "curvature": 0.012139
-    },
-    {
-      "index": 79,
-      "x": 33.7626,
-      "y": 29.5203,
-      "yaw_rad": 1.9226,
-      "yaw_deg": 110.16,
-      "direction": "倒车",
-      "curvature": 0.096321
-    },
-    {
-      "index": 80,
-      "x": 33.9349,
-      "y": 29.051,
-      "yaw_rad": 2.0189,
-      "yaw_deg": 115.68,
-      "direction": "倒车",
-      "curvature": 0.096321
-    },
-    {
-      "index": 81,
-      "x": 34.1516,
-      "y": 28.6003,
-      "yaw_rad": 2.1153,
-      "yaw_deg": 121.2,
-      "direction": "倒车",
-      "curvature": 0.096321
-    },
-    {
-      "index": 82,
-      "x": 34.4106,
-      "y": 28.1726,
-      "yaw_rad": 2.2117,
-      "yaw_deg": 126.72,
-      "direction": "倒车",
-      "curvature": 0.096321
-    },
-    {
-      "index": 83,
-      "x": 34.7095,
-      "y": 27.7719,
-      "yaw_rad": 2.308,
-      "yaw_deg": 132.24,
-      "direction": "倒车",
-      "curvature": 0.096321
-    },
-    {
-      "index": 84,
-      "x": 35.0456,
-      "y": 27.4017,
-      "yaw_rad": 2.4044,
-      "yaw_deg": 137.76,
-      "direction": "倒车",
-      "curvature": 0.096321
-    },
-    {
-      "index": 85,
-      "x": 35.4158,
-      "y": 27.0656,
-      "yaw_rad": 2.4415,
-      "yaw_deg": 139.89,
-      "direction": "倒车",
-      "curvature": 0.037133
-    },
-    {
-      "index": 86,
-      "x": 35.7982,
-      "y": 26.7434,
-      "yaw_rad": 2.4786,
-      "yaw_deg": 142.02,
-      "direction": "倒车",
-      "curvature": 0.037133
-    },
-    {
-      "index": 87,
-      "x": 36.1923,
-      "y": 26.4357,
-      "yaw_rad": 2.5158,
-      "yaw_deg": 144.14,
-      "direction": "倒车",
-      "curvature": 0.037133
-    },
-    {
-      "index": 88,
-      "x": 36.5975,
-      "y": 26.1428,
-      "yaw_rad": 2.5529,
-      "yaw_deg": 146.27,
-      "direction": "倒车",
-      "curvature": 0.037133
-    },
-    {
-      "index": 89,
-      "x": 37.0134,
-      "y": 25.8652,
-      "yaw_rad": 2.5901,
-      "yaw_deg": 148.4,
-      "direction": "倒车",
-      "curvature": 0.037133
-    },
-    {
-      "index": 90,
-      "x": 37.4392,
-      "y": 25.6032,
-      "yaw_rad": 2.6272,
-      "yaw_deg": 150.53,
-      "direction": "倒车",
-      "curvature": 0.037133
-    },
-    {
-      "index": 91,
-      "x": 37.8745,
-      "y": 25.3572,
-      "yaw_rad": 2.7235,
-      "yaw_deg": 156.05,
-      "direction": "倒车",
-      "curvature": 0.096321
-    },
-    {
-      "index": 92,
-      "x": 38.3315,
-      "y": 25.1542,
-      "yaw_rad": 2.8199,
-      "yaw_deg": 161.57,
-      "direction": "倒车",
-      "curvature": 0.096321
-    },
-    {
-      "index": 93,
-      "x": 38.8058,
-      "y": 24.9961,
-      "yaw_rad": 2.9163,
-      "yaw_deg": 167.09,
-      "direction": "倒车",
-      "curvature": 0.096321
-    },
-    {
-      "index": 94,
-      "x": 39.2932,
-      "y": 24.8844,
-      "yaw_rad": 3.0126,
-      "yaw_deg": 172.61,
-      "direction": "倒车",
-      "curvature": 0.096321
-    },
-    {
-      "index": 95,
-      "x": 39.789,
-      "y": 24.8201,
-      "yaw_rad": 3.109,
-      "yaw_deg": 178.13,
-      "direction": "倒车",
-      "curvature": 0.096321
-    },
-    {
-      "index": 96,
-      "x": 40.2888,
-      "y": 24.8038,
-      "yaw_rad": 3.2053,
-      "yaw_deg": 183.65,
-      "direction": "倒车",
-      "curvature": 0.096321
-    },
-    {
-      "index": 97,
-      "x": 40.7878,
-      "y": 24.8357,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": -0.0
-    },
-    {
       "index": 98,
-      "x": 41.2867,
-      "y": 24.8675,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": -0.0
+      "x": 40.6324,
+      "y": 22.5689,
+      "yaw_rad": -0.6848,
+      "yaw_deg": -39.23,
+      "direction": "前进",
+      "curvature": 0.079632
     },
     {
       "index": 99,
-      "x": 41.7857,
-      "y": 24.8994,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 41.0197,
+      "y": 22.2526,
+      "yaw_rad": -0.6051,
+      "yaw_deg": -34.67,
+      "direction": "前进",
+      "curvature": 0.079632
     },
     {
       "index": 100,
-      "x": 42.2847,
-      "y": 24.9312,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": -0.0
+      "x": 41.4309,
+      "y": 21.9682,
+      "yaw_rad": -0.5255,
+      "yaw_deg": -30.11,
+      "direction": "前进",
+      "curvature": 0.079632
     },
     {
       "index": 101,
-      "x": 42.7837,
-      "y": 24.9631,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 41.8634,
+      "y": 21.7174,
+      "yaw_rad": -0.4458,
+      "yaw_deg": -25.54,
+      "direction": "前进",
+      "curvature": 0.079632
     },
     {
       "index": 102,
-      "x": 43.2827,
-      "y": 24.9949,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": -0.0
+      "x": 42.3146,
+      "y": 21.5018,
+      "yaw_rad": -0.3661,
+      "yaw_deg": -20.98,
+      "direction": "前进",
+      "curvature": 0.079632
     },
     {
       "index": 103,
-      "x": 43.7817,
-      "y": 25.0268,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": -0.0
+      "x": 42.7814,
+      "y": 21.3228,
+      "yaw_rad": -0.3661,
+      "yaw_deg": -20.98,
+      "direction": "前进",
+      "curvature": 0.0
     },
     {
       "index": 104,
-      "x": 44.2806,
-      "y": 25.0586,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
+      "x": 43.2483,
+      "y": 21.1438,
+      "yaw_rad": -0.3661,
+      "yaw_deg": -20.98,
+      "direction": "前进",
       "curvature": 0.0
     },
     {
       "index": 105,
-      "x": 44.7796,
-      "y": 25.0905,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": -0.0
+      "x": 43.7151,
+      "y": 20.9648,
+      "yaw_rad": -0.3661,
+      "yaw_deg": -20.98,
+      "direction": "前进",
+      "curvature": 0.0
     },
     {
       "index": 106,
-      "x": 45.2786,
-      "y": 25.1223,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
+      "x": 44.182,
+      "y": 20.7858,
+      "yaw_rad": -0.3661,
+      "yaw_deg": -20.98,
+      "direction": "前进",
       "curvature": 0.0
     },
     {
       "index": 107,
-      "x": 45.7776,
-      "y": 25.1542,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
+      "x": 44.6488,
+      "y": 20.6068,
+      "yaw_rad": -0.3661,
+      "yaw_deg": -20.98,
+      "direction": "前进",
       "curvature": 0.0
     },
     {
       "index": 108,
-      "x": 46.2766,
-      "y": 25.1861,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": -0.0
+      "x": 45.1157,
+      "y": 20.4278,
+      "yaw_rad": -0.3661,
+      "yaw_deg": -20.98,
+      "direction": "前进",
+      "curvature": 0.0
     },
     {
       "index": 109,
-      "x": 46.7756,
-      "y": 25.2179,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 45.5826,
+      "y": 20.2487,
+      "yaw_rad": -0.2865,
+      "yaw_deg": -16.41,
+      "direction": "前进",
+      "curvature": 0.079632
     },
     {
       "index": 110,
-      "x": 47.2746,
-      "y": 25.2498,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 46.0622,
+      "y": 20.1074,
+      "yaw_rad": -0.2068,
+      "yaw_deg": -11.85,
+      "direction": "前进",
+      "curvature": 0.079632
     },
     {
       "index": 111,
-      "x": 47.7735,
-      "y": 25.2816,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": -0.0
+      "x": 46.5515,
+      "y": 20.0048,
+      "yaw_rad": -0.1272,
+      "yaw_deg": -7.29,
+      "direction": "前进",
+      "curvature": 0.079632
     },
     {
       "index": 112,
-      "x": 48.2725,
-      "y": 25.3135,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 47.0475,
+      "y": 19.9413,
+      "yaw_rad": -0.0475,
+      "yaw_deg": -2.72,
+      "direction": "前进",
+      "curvature": 0.079632
     },
     {
       "index": 113,
-      "x": 48.7715,
-      "y": 25.3453,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 47.5469,
+      "y": 19.9176,
+      "yaw_rad": 0.0321,
+      "yaw_deg": 1.84,
+      "direction": "前进",
+      "curvature": 0.079632
     },
     {
       "index": 114,
-      "x": 49.2705,
-      "y": 25.3772,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": -0.0
+      "x": 48.0467,
+      "y": 19.9336,
+      "yaw_rad": 0.1118,
+      "yaw_deg": 6.4,
+      "direction": "前进",
+      "curvature": 0.079632
     },
     {
       "index": 115,
-      "x": 49.7695,
-      "y": 25.409,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 48.5435,
+      "y": 19.9894,
+      "yaw_rad": 0.2081,
+      "yaw_deg": 11.93,
+      "direction": "前进",
+      "curvature": 0.096321
     },
     {
       "index": 116,
-      "x": 50.2685,
-      "y": 25.4409,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 49.0328,
+      "y": 20.0927,
+      "yaw_rad": 0.3045,
+      "yaw_deg": 17.45,
+      "direction": "前进",
+      "curvature": 0.096321
     },
     {
       "index": 117,
-      "x": 50.7674,
-      "y": 25.4727,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": -0.0
+      "x": 49.5097,
+      "y": 20.2426,
+      "yaw_rad": 0.4009,
+      "yaw_deg": 22.97,
+      "direction": "前进",
+      "curvature": 0.096321
     },
     {
       "index": 118,
-      "x": 51.2664,
-      "y": 25.5046,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 49.9701,
+      "y": 20.4377,
+      "yaw_rad": 0.4972,
+      "yaw_deg": 28.49,
+      "direction": "前进",
+      "curvature": 0.096321
     },
     {
       "index": 119,
-      "x": 51.7654,
-      "y": 25.5364,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": -0.0
+      "x": 50.4096,
+      "y": 20.6762,
+      "yaw_rad": 0.5936,
+      "yaw_deg": 34.01,
+      "direction": "前进",
+      "curvature": 0.096321
     },
     {
       "index": 120,
-      "x": 52.2644,
-      "y": 25.5683,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 50.824,
+      "y": 20.9559,
+      "yaw_rad": 0.6899,
+      "yaw_deg": 39.53,
+      "direction": "前进",
+      "curvature": 0.096321
     },
     {
       "index": 121,
-      "x": 52.7634,
-      "y": 25.6001,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": -0.0
+      "x": 51.2097,
+      "y": 21.2741,
+      "yaw_rad": 0.7144,
+      "yaw_deg": 40.93,
+      "direction": "前进",
+      "curvature": 0.024455
     },
     {
       "index": 122,
-      "x": 53.2624,
-      "y": 25.632,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 51.5874,
+      "y": 21.6017,
+      "yaw_rad": 0.7388,
+      "yaw_deg": 42.33,
+      "direction": "前进",
+      "curvature": 0.024455
     },
     {
       "index": 123,
-      "x": 53.7614,
-      "y": 25.6638,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 51.9571,
+      "y": 21.9384,
+      "yaw_rad": 0.7633,
+      "yaw_deg": 43.73,
+      "direction": "前进",
+      "curvature": 0.024455
     },
     {
       "index": 124,
-      "x": 54.2603,
-      "y": 25.6957,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": -0.0
+      "x": 52.3184,
+      "y": 22.2841,
+      "yaw_rad": 0.7877,
+      "yaw_deg": 45.13,
+      "direction": "前进",
+      "curvature": 0.024455
     },
     {
       "index": 125,
-      "x": 54.7593,
-      "y": 25.7276,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 52.6711,
+      "y": 22.6385,
+      "yaw_rad": 0.8122,
+      "yaw_deg": 46.54,
+      "direction": "前进",
+      "curvature": 0.024455
     },
     {
       "index": 126,
-      "x": 55.2583,
-      "y": 25.7594,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 53.015,
+      "y": 23.0014,
+      "yaw_rad": 0.8367,
+      "yaw_deg": 47.94,
+      "direction": "前进",
+      "curvature": 0.024455
     },
     {
       "index": 127,
-      "x": 55.7573,
-      "y": 25.7913,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": -0.0
+      "x": 53.35,
+      "y": 23.3726,
+      "yaw_rad": 0.8367,
+      "yaw_deg": 47.94,
+      "direction": "前进",
+      "curvature": 0.0
     },
     {
       "index": 128,
-      "x": 56.2563,
-      "y": 25.8231,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
+      "x": 53.685,
+      "y": 23.7438,
+      "yaw_rad": 0.8367,
+      "yaw_deg": 47.94,
+      "direction": "前进",
       "curvature": 0.0
     },
     {
       "index": 129,
-      "x": 56.7553,
-      "y": 25.855,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": -0.0
+      "x": 54.0199,
+      "y": 24.115,
+      "yaw_rad": 0.8367,
+      "yaw_deg": 47.94,
+      "direction": "前进",
+      "curvature": 0.0
     },
     {
       "index": 130,
-      "x": 57.2542,
-      "y": 25.8868,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
+      "x": 54.3549,
+      "y": 24.4862,
+      "yaw_rad": 0.8367,
+      "yaw_deg": 47.94,
+      "direction": "前进",
       "curvature": 0.0
     },
     {
       "index": 131,
-      "x": 57.7532,
-      "y": 25.9187,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
+      "x": 54.6899,
+      "y": 24.8574,
+      "yaw_rad": 0.8367,
+      "yaw_deg": 47.94,
+      "direction": "前进",
       "curvature": 0.0
     },
     {
       "index": 132,
-      "x": 58.2522,
-      "y": 25.9505,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
+      "x": 55.0249,
+      "y": 25.2286,
+      "yaw_rad": 0.8367,
+      "yaw_deg": 47.94,
+      "direction": "前进",
       "curvature": 0.0
     },
     {
       "index": 133,
-      "x": 58.7512,
-      "y": 25.9824,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": -0.0
+      "x": 55.3598,
+      "y": 25.5998,
+      "yaw_rad": 0.757,
+      "yaw_deg": 43.37,
+      "direction": "前进",
+      "curvature": -0.079632
     },
     {
       "index": 134,
-      "x": 59.2502,
-      "y": 26.0142,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": -0.0
+      "x": 55.7233,
+      "y": 25.9432,
+      "yaw_rad": 0.6774,
+      "yaw_deg": 38.81,
+      "direction": "前进",
+      "curvature": -0.079632
     },
     {
       "index": 135,
-      "x": 59.7492,
-      "y": 26.0461,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 56.1129,
+      "y": 26.2565,
+      "yaw_rad": 0.5977,
+      "yaw_deg": 34.25,
+      "direction": "前进",
+      "curvature": -0.079632
     },
     {
       "index": 136,
-      "x": 60.2481,
-      "y": 26.0779,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": -0.0
+      "x": 56.5262,
+      "y": 26.5379,
+      "yaw_rad": 0.518,
+      "yaw_deg": 29.68,
+      "direction": "前进",
+      "curvature": -0.079632
     },
     {
       "index": 137,
-      "x": 60.7471,
-      "y": 26.1098,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 56.9606,
+      "y": 26.7855,
+      "yaw_rad": 0.4384,
+      "yaw_deg": 25.12,
+      "direction": "前进",
+      "curvature": -0.079632
     },
     {
       "index": 138,
-      "x": 61.2461,
-      "y": 26.1416,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 57.4133,
+      "y": 26.9977,
+      "yaw_rad": 0.3587,
+      "yaw_deg": 20.55,
+      "direction": "前进",
+      "curvature": -0.079632
     },
     {
       "index": 139,
-      "x": 61.7451,
-      "y": 26.1735,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": -0.0
+      "x": 57.8815,
+      "y": 27.1733,
+      "yaw_rad": 0.3466,
+      "yaw_deg": 19.86,
+      "direction": "前进",
+      "curvature": -0.012139
     },
     {
       "index": 140,
-      "x": 62.2441,
-      "y": 26.2053,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 58.3518,
+      "y": 27.3431,
+      "yaw_rad": 0.3345,
+      "yaw_deg": 19.16,
+      "direction": "前进",
+      "curvature": -0.012139
     },
     {
       "index": 141,
-      "x": 62.7431,
-      "y": 26.2372,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 58.8241,
+      "y": 27.5073,
+      "yaw_rad": 0.3223,
+      "yaw_deg": 18.47,
+      "direction": "前进",
+      "curvature": -0.012139
     },
     {
       "index": 142,
-      "x": 63.2421,
-      "y": 26.269,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": -0.0
+      "x": 59.2983,
+      "y": 27.6656,
+      "yaw_rad": 0.3102,
+      "yaw_deg": 17.77,
+      "direction": "前进",
+      "curvature": -0.012139
     },
     {
       "index": 143,
-      "x": 63.741,
-      "y": 26.3009,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
+      "x": 59.7744,
+      "y": 27.8183,
+      "yaw_rad": 0.298,
+      "yaw_deg": 17.08,
+      "direction": "前进",
+      "curvature": -0.012139
+    },
+    {
+      "index": 144,
+      "x": 60.2524,
+      "y": 27.9651,
+      "yaw_rad": 0.2859,
+      "yaw_deg": 16.38,
+      "direction": "前进",
+      "curvature": 1.999963
+    },
+    {
+      "index": 145,
+      "x": 59.7727,
+      "y": 27.8241,
+      "yaw_rad": 0.2859,
+      "yaw_deg": 16.38,
       "direction": "倒车",
       "curvature": 0.0
     },
     {
-      "index": 144,
-      "x": 64.24,
-      "y": 26.3328,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
+      "index": 146,
+      "x": 59.293,
+      "y": 27.6831,
+      "yaw_rad": 0.2859,
+      "yaw_deg": 16.38,
       "direction": "倒车",
       "curvature": -0.0
     },
     {
-      "index": 145,
-      "x": 64.739,
-      "y": 26.3646,
-      "yaw_rad": -3.0778,
-      "yaw_deg": -176.35,
-      "direction": "倒车",
-      "curvature": -0.027884
-    },
-    {
-      "index": 146,
-      "x": 65.2385,
-      "y": 26.3825,
-      "yaw_rad": 3.132,
-      "yaw_deg": 179.45,
-      "direction": "倒车",
-      "curvature": -1.999509
-    },
-    {
       "index": 147,
-      "x": 64.7391,
-      "y": 26.3632,
-      "yaw_rad": -3.0548,
-      "yaw_deg": -175.03,
-      "direction": "前进",
-      "curvature": 0.096358
+      "x": 58.8133,
+      "y": 27.5421,
+      "yaw_rad": 0.2859,
+      "yaw_deg": 16.38,
+      "direction": "倒车",
+      "curvature": 0.0
     },
     {
       "index": 148,
-      "x": 64.2438,
-      "y": 26.296,
-      "yaw_rad": -2.9584,
-      "yaw_deg": -169.51,
-      "direction": "前进",
-      "curvature": 0.096358
+      "x": 58.3336,
+      "y": 27.401,
+      "yaw_rad": 0.2859,
+      "yaw_deg": 16.38,
+      "direction": "倒车",
+      "curvature": -0.0
     },
     {
       "index": 149,
-      "x": 63.7574,
-      "y": 26.1814,
-      "yaw_rad": -2.8621,
-      "yaw_deg": -163.98,
-      "direction": "前进",
-      "curvature": 0.096358
+      "x": 57.8539,
+      "y": 27.26,
+      "yaw_rad": 0.2859,
+      "yaw_deg": 16.38,
+      "direction": "倒车",
+      "curvature": -0.0
     },
     {
       "index": 150,
-      "x": 63.2841,
-      "y": 26.0205,
-      "yaw_rad": -2.7657,
-      "yaw_deg": -158.46,
-      "direction": "前进",
-      "curvature": 0.096358
+      "x": 57.3742,
+      "y": 27.119,
+      "yaw_rad": 0.2859,
+      "yaw_deg": 16.38,
+      "direction": "倒车",
+      "curvature": 0.0
     },
     {
       "index": 151,
-      "x": 62.8286,
-      "y": 25.8149,
-      "yaw_rad": -2.6694,
-      "yaw_deg": -152.94,
-      "direction": "前进",
-      "curvature": 0.096358
+      "x": 56.8945,
+      "y": 26.978,
+      "yaw_rad": 0.2859,
+      "yaw_deg": 16.38,
+      "direction": "倒车",
+      "curvature": -0.0
     },
     {
       "index": 152,
-      "x": 62.395,
-      "y": 25.5663,
-      "yaw_rad": -2.573,
-      "yaw_deg": -147.42,
-      "direction": "前进",
-      "curvature": 0.096358
+      "x": 56.4148,
+      "y": 26.837,
+      "yaw_rad": 0.2859,
+      "yaw_deg": 16.38,
+      "direction": "倒车",
+      "curvature": 0.0
     },
     {
       "index": 153,
-      "x": 61.9873,
-      "y": 25.2772,
-      "yaw_rad": -2.4766,
-      "yaw_deg": -141.9,
-      "direction": "前进",
-      "curvature": 0.096358
+      "x": 55.9351,
+      "y": 26.696,
+      "yaw_rad": 0.2859,
+      "yaw_deg": 16.38,
+      "direction": "倒车",
+      "curvature": -0.0
     },
     {
       "index": 154,
-      "x": 61.6092,
-      "y": 24.9503,
-      "yaw_rad": -2.3803,
-      "yaw_deg": -136.38,
-      "direction": "前进",
-      "curvature": 0.096358
+      "x": 55.4554,
+      "y": 26.555,
+      "yaw_rad": 0.2859,
+      "yaw_deg": 16.38,
+      "direction": "倒车",
+      "curvature": 0.0
     },
     {
       "index": 155,
-      "x": 61.2644,
-      "y": 24.5884,
-      "yaw_rad": -2.2839,
-      "yaw_deg": -130.86,
-      "direction": "前进",
-      "curvature": 0.096358
+      "x": 54.9757,
+      "y": 26.414,
+      "yaw_rad": 0.2859,
+      "yaw_deg": 16.38,
+      "direction": "倒车",
+      "curvature": 0.0
     },
     {
       "index": 156,
-      "x": 60.9561,
-      "y": 24.1951,
-      "yaw_rad": -2.1876,
-      "yaw_deg": -125.34,
-      "direction": "前进",
-      "curvature": 0.096358
+      "x": 54.496,
+      "y": 26.2729,
+      "yaw_rad": 0.2859,
+      "yaw_deg": 16.38,
+      "direction": "倒车",
+      "curvature": -0.0
     },
     {
       "index": 157,
-      "x": 60.6869,
-      "y": 23.7739,
-      "yaw_rad": -2.0912,
-      "yaw_deg": -119.82,
-      "direction": "前进",
-      "curvature": 0.096358
+      "x": 54.0163,
+      "y": 26.1319,
+      "yaw_rad": 0.2859,
+      "yaw_deg": 16.38,
+      "direction": "倒车",
+      "curvature": 0.0
     },
     {
       "index": 158,
-      "x": 60.4596,
-      "y": 23.3288,
-      "yaw_rad": -1.9948,
-      "yaw_deg": -114.3,
-      "direction": "前进",
-      "curvature": 0.096358
+      "x": 53.5366,
+      "y": 25.9909,
+      "yaw_rad": 0.2859,
+      "yaw_deg": 16.38,
+      "direction": "倒车",
+      "curvature": 0.017703
     },
     {
       "index": 159,
-      "x": 60.2761,
-      "y": 22.8639,
-      "yaw_rad": -1.8985,
-      "yaw_deg": -108.78,
-      "direction": "前进",
-      "curvature": 0.096358
+      "x": 53.0595,
+      "y": 25.8415,
+      "yaw_rad": 0.3443,
+      "yaw_deg": 19.73,
+      "direction": "倒车",
+      "curvature": 1.999852
     },
     {
       "index": 160,
-      "x": 60.1382,
-      "y": 22.3835,
-      "yaw_rad": -1.8021,
-      "yaw_deg": -103.25,
+      "x": 53.5376,
+      "y": 25.9873,
+      "yaw_rad": 0.248,
+      "yaw_deg": 14.21,
       "direction": "前进",
-      "curvature": 0.096358
+      "curvature": -0.096358
     },
     {
       "index": 161,
-      "x": 60.0472,
-      "y": 21.8921,
-      "yaw_rad": -1.7058,
-      "yaw_deg": -97.73,
+      "x": 54.0274,
+      "y": 26.0865,
+      "yaw_rad": 0.1516,
+      "yaw_deg": 8.69,
       "direction": "前进",
-      "curvature": 0.096358
+      "curvature": -0.096358
     },
     {
       "index": 162,
-      "x": 60.0039,
-      "y": 21.3941,
-      "yaw_rad": -1.6094,
-      "yaw_deg": -92.21,
+      "x": 54.5246,
+      "y": 26.1381,
+      "yaw_rad": 0.0552,
+      "yaw_deg": 3.16,
       "direction": "前进",
-      "curvature": 0.079056
+      "curvature": -0.096358
     },
     {
       "index": 163,
-      "x": 60.0,
-      "y": 20.8942,
-      "yaw_rad": -1.5708,
-      "yaw_deg": -90.0,
+      "x": 55.0244,
+      "y": 26.1416,
+      "yaw_rad": -0.0411,
+      "yaw_deg": -2.36,
       "direction": "前进",
-      "curvature": -1.999974
+      "curvature": -0.096358
     },
     {
       "index": 164,
-      "x": 60.0,
-      "y": 21.3942,
-      "yaw_rad": -1.5708,
-      "yaw_deg": -90.0,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 55.5222,
+      "y": 26.0971,
+      "yaw_rad": -0.1375,
+      "yaw_deg": -7.88,
+      "direction": "前进",
+      "curvature": -0.096358
     },
     {
       "index": 165,
-      "x": 60.0,
-      "y": 21.8942,
-      "yaw_rad": -1.5708,
-      "yaw_deg": -90.0,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 56.0134,
+      "y": 26.0048,
+      "yaw_rad": -0.2338,
+      "yaw_deg": -13.4,
+      "direction": "前进",
+      "curvature": -0.096358
     },
     {
       "index": 166,
-      "x": 60.0,
-      "y": 22.3942,
-      "yaw_rad": -1.5708,
-      "yaw_deg": -90.0,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 56.4935,
+      "y": 25.8657,
+      "yaw_rad": -0.3302,
+      "yaw_deg": -18.92,
+      "direction": "前进",
+      "curvature": -0.096358
     },
     {
       "index": 167,
-      "x": 60.0,
-      "y": 22.8942,
-      "yaw_rad": -1.5708,
-      "yaw_deg": -90.0,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 56.9579,
+      "y": 25.6811,
+      "yaw_rad": -0.4266,
+      "yaw_deg": -24.44,
+      "direction": "前进",
+      "curvature": -0.096358
     },
     {
       "index": 168,
-      "x": 60.0,
-      "y": 23.3942,
-      "yaw_rad": -1.5708,
-      "yaw_deg": -90.0,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 57.4024,
+      "y": 25.4526,
+      "yaw_rad": -0.5229,
+      "yaw_deg": -29.96,
+      "direction": "前进",
+      "curvature": -0.096358
     },
     {
       "index": 169,
-      "x": 60.0,
-      "y": 23.8942,
-      "yaw_rad": -1.5708,
-      "yaw_deg": -90.0,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 57.8229,
+      "y": 25.1824,
+      "yaw_rad": -0.6193,
+      "yaw_deg": -35.48,
+      "direction": "前进",
+      "curvature": -0.096358
     },
     {
       "index": 170,
-      "x": 60.0,
-      "y": 24.3942,
-      "yaw_rad": -1.5708,
-      "yaw_deg": -90.0,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 58.2155,
+      "y": 24.8731,
+      "yaw_rad": -0.7156,
+      "yaw_deg": -41.0,
+      "direction": "前进",
+      "curvature": -0.096358
     },
     {
       "index": 171,
-      "x": 60.0,
-      "y": 24.8942,
-      "yaw_rad": -1.5708,
-      "yaw_deg": -90.0,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 58.5764,
+      "y": 24.5274,
+      "yaw_rad": -0.812,
+      "yaw_deg": -46.52,
+      "direction": "前进",
+      "curvature": -0.096358
     },
     {
       "index": 172,
-      "x": 60.0,
-      "y": 25.3942,
-      "yaw_rad": -1.5708,
-      "yaw_deg": -90.0,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 58.9025,
+      "y": 24.1485,
+      "yaw_rad": -0.9083,
+      "yaw_deg": -52.04,
+      "direction": "前进",
+      "curvature": -0.096358
     },
     {
       "index": 173,
-      "x": 60.0,
-      "y": 25.8942,
-      "yaw_rad": -1.5708,
-      "yaw_deg": -90.0,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 59.1905,
+      "y": 23.7401,
+      "yaw_rad": -1.0047,
+      "yaw_deg": -57.57,
+      "direction": "前进",
+      "curvature": -0.096358
     },
     {
       "index": 174,
-      "x": 60.0,
-      "y": 26.3942,
-      "yaw_rad": -1.5708,
-      "yaw_deg": -90.0,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 59.438,
+      "y": 23.3058,
+      "yaw_rad": -1.1011,
+      "yaw_deg": -63.09,
+      "direction": "前进",
+      "curvature": -0.096358
     },
     {
       "index": 175,
-      "x": 60.0,
-      "y": 26.8942,
-      "yaw_rad": -1.5708,
-      "yaw_deg": -90.0,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 59.6425,
+      "y": 22.8498,
+      "yaw_rad": -1.1974,
+      "yaw_deg": -68.61,
+      "direction": "前进",
+      "curvature": -0.096358
     },
     {
       "index": 176,
-      "x": 60.0,
-      "y": 27.3942,
-      "yaw_rad": -1.5708,
-      "yaw_deg": -90.0,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 59.8022,
+      "y": 22.3762,
+      "yaw_rad": -1.2938,
+      "yaw_deg": -74.13,
+      "direction": "前进",
+      "curvature": -0.096358
     },
     {
       "index": 177,
-      "x": 60.0,
-      "y": 27.8942,
-      "yaw_rad": -1.5708,
-      "yaw_deg": -90.0,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 59.9156,
+      "y": 21.8894,
+      "yaw_rad": -1.3901,
+      "yaw_deg": -79.65,
+      "direction": "前进",
+      "curvature": -0.096358
     },
     {
       "index": 178,
-      "x": 60.0,
-      "y": 28.3942,
-      "yaw_rad": -1.5708,
-      "yaw_deg": -90.0,
-      "direction": "倒车",
-      "curvature": 0.0
+      "x": 59.9816,
+      "y": 21.394,
+      "yaw_rad": -1.4865,
+      "yaw_deg": -85.17,
+      "direction": "前进",
+      "curvature": -0.095603
     },
     {
       "index": 179,
       "x": 60.0,
-      "y": 28.8942,
+      "y": 20.8945,
       "yaw_rad": -1.5708,
       "yaw_deg": -90.0,
-      "direction": "倒车",
-      "curvature": 0.0
+      "direction": "前进",
+      "curvature": 1.999923
     },
     {
       "index": 180,
       "x": 60.0,
-      "y": 29.3942,
+      "y": 21.3945,
       "yaw_rad": -1.5708,
       "yaw_deg": -90.0,
       "direction": "倒车",
@@ -1638,7 +1638,7 @@
     {
       "index": 181,
       "x": 60.0,
-      "y": 29.8942,
+      "y": 21.8945,
       "yaw_rad": -1.5708,
       "yaw_deg": -90.0,
       "direction": "倒车",
@@ -1647,7 +1647,7 @@
     {
       "index": 182,
       "x": 60.0,
-      "y": 30.3942,
+      "y": 22.3945,
       "yaw_rad": -1.5708,
       "yaw_deg": -90.0,
       "direction": "倒车",
@@ -1656,7 +1656,7 @@
     {
       "index": 183,
       "x": 60.0,
-      "y": 30.8942,
+      "y": 22.8945,
       "yaw_rad": -1.5708,
       "yaw_deg": -90.0,
       "direction": "倒车",
@@ -1665,7 +1665,7 @@
     {
       "index": 184,
       "x": 60.0,
-      "y": 31.3942,
+      "y": 23.3945,
       "yaw_rad": -1.5708,
       "yaw_deg": -90.0,
       "direction": "倒车",
@@ -1674,7 +1674,7 @@
     {
       "index": 185,
       "x": 60.0,
-      "y": 31.8942,
+      "y": 23.8945,
       "yaw_rad": -1.5708,
       "yaw_deg": -90.0,
       "direction": "倒车",
@@ -1683,7 +1683,7 @@
     {
       "index": 186,
       "x": 60.0,
-      "y": 32.3942,
+      "y": 24.3945,
       "yaw_rad": -1.5708,
       "yaw_deg": -90.0,
       "direction": "倒车",
@@ -1692,7 +1692,7 @@
     {
       "index": 187,
       "x": 60.0,
-      "y": 32.8942,
+      "y": 24.8945,
       "yaw_rad": -1.5708,
       "yaw_deg": -90.0,
       "direction": "倒车",
@@ -1701,7 +1701,7 @@
     {
       "index": 188,
       "x": 60.0,
-      "y": 33.3942,
+      "y": 25.3945,
       "yaw_rad": -1.5708,
       "yaw_deg": -90.0,
       "direction": "倒车",
@@ -1710,7 +1710,7 @@
     {
       "index": 189,
       "x": 60.0,
-      "y": 33.8942,
+      "y": 25.8945,
       "yaw_rad": -1.5708,
       "yaw_deg": -90.0,
       "direction": "倒车",
@@ -1719,7 +1719,7 @@
     {
       "index": 190,
       "x": 60.0,
-      "y": 34.3942,
+      "y": 26.3945,
       "yaw_rad": -1.5708,
       "yaw_deg": -90.0,
       "direction": "倒车",
@@ -1728,7 +1728,7 @@
     {
       "index": 191,
       "x": 60.0,
-      "y": 34.8942,
+      "y": 26.8945,
       "yaw_rad": -1.5708,
       "yaw_deg": -90.0,
       "direction": "倒车",
@@ -1737,7 +1737,7 @@
     {
       "index": 192,
       "x": 60.0,
-      "y": 35.3942,
+      "y": 27.3945,
       "yaw_rad": -1.5708,
       "yaw_deg": -90.0,
       "direction": "倒车",
@@ -1746,7 +1746,7 @@
     {
       "index": 193,
       "x": 60.0,
-      "y": 35.8942,
+      "y": 27.8945,
       "yaw_rad": -1.5708,
       "yaw_deg": -90.0,
       "direction": "倒车",
@@ -1755,7 +1755,7 @@
     {
       "index": 194,
       "x": 60.0,
-      "y": 36.3942,
+      "y": 28.3945,
       "yaw_rad": -1.5708,
       "yaw_deg": -90.0,
       "direction": "倒车",
@@ -1764,7 +1764,7 @@
     {
       "index": 195,
       "x": 60.0,
-      "y": 36.8942,
+      "y": 28.8945,
       "yaw_rad": -1.5708,
       "yaw_deg": -90.0,
       "direction": "倒车",
@@ -1773,7 +1773,7 @@
     {
       "index": 196,
       "x": 60.0,
-      "y": 37.3942,
+      "y": 29.3945,
       "yaw_rad": -1.5708,
       "yaw_deg": -90.0,
       "direction": "倒车",
@@ -1782,7 +1782,7 @@
     {
       "index": 197,
       "x": 60.0,
-      "y": 37.8942,
+      "y": 29.8945,
       "yaw_rad": -1.5708,
       "yaw_deg": -90.0,
       "direction": "倒车",
@@ -1791,7 +1791,7 @@
     {
       "index": 198,
       "x": 60.0,
-      "y": 38.3942,
+      "y": 30.3945,
       "yaw_rad": -1.5708,
       "yaw_deg": -90.0,
       "direction": "倒车",
@@ -1800,7 +1800,7 @@
     {
       "index": 199,
       "x": 60.0,
-      "y": 38.8942,
+      "y": 30.8945,
       "yaw_rad": -1.5708,
       "yaw_deg": -90.0,
       "direction": "倒车",
@@ -1809,7 +1809,7 @@
     {
       "index": 200,
       "x": 60.0,
-      "y": 39.3942,
+      "y": 31.3945,
       "yaw_rad": -1.5708,
       "yaw_deg": -90.0,
       "direction": "倒车",
@@ -1818,7 +1818,7 @@
     {
       "index": 201,
       "x": 60.0,
-      "y": 39.8942,
+      "y": 31.8945,
       "yaw_rad": -1.5708,
       "yaw_deg": -90.0,
       "direction": "倒车",
@@ -1827,7 +1827,7 @@
     {
       "index": 202,
       "x": 60.0,
-      "y": 40.3942,
+      "y": 32.3945,
       "yaw_rad": -1.5708,
       "yaw_deg": -90.0,
       "direction": "倒车",
@@ -1836,7 +1836,7 @@
     {
       "index": 203,
       "x": 60.0,
-      "y": 40.8942,
+      "y": 32.8945,
       "yaw_rad": -1.5708,
       "yaw_deg": -90.0,
       "direction": "倒车",
@@ -1845,7 +1845,7 @@
     {
       "index": 204,
       "x": 60.0,
-      "y": 41.3942,
+      "y": 33.3945,
       "yaw_rad": -1.5708,
       "yaw_deg": -90.0,
       "direction": "倒车",
@@ -1854,7 +1854,7 @@
     {
       "index": 205,
       "x": 60.0,
-      "y": 41.8942,
+      "y": 33.8945,
       "yaw_rad": -1.5708,
       "yaw_deg": -90.0,
       "direction": "倒车",
@@ -1862,6 +1862,150 @@
     },
     {
       "index": 206,
+      "x": 60.0,
+      "y": 34.3945,
+      "yaw_rad": -1.5708,
+      "yaw_deg": -90.0,
+      "direction": "倒车",
+      "curvature": 0.0
+    },
+    {
+      "index": 207,
+      "x": 60.0,
+      "y": 34.8945,
+      "yaw_rad": -1.5708,
+      "yaw_deg": -90.0,
+      "direction": "倒车",
+      "curvature": 0.0
+    },
+    {
+      "index": 208,
+      "x": 60.0,
+      "y": 35.3945,
+      "yaw_rad": -1.5708,
+      "yaw_deg": -90.0,
+      "direction": "倒车",
+      "curvature": 0.0
+    },
+    {
+      "index": 209,
+      "x": 60.0,
+      "y": 35.8945,
+      "yaw_rad": -1.5708,
+      "yaw_deg": -90.0,
+      "direction": "倒车",
+      "curvature": 0.0
+    },
+    {
+      "index": 210,
+      "x": 60.0,
+      "y": 36.3945,
+      "yaw_rad": -1.5708,
+      "yaw_deg": -90.0,
+      "direction": "倒车",
+      "curvature": 0.0
+    },
+    {
+      "index": 211,
+      "x": 60.0,
+      "y": 36.8945,
+      "yaw_rad": -1.5708,
+      "yaw_deg": -90.0,
+      "direction": "倒车",
+      "curvature": 0.0
+    },
+    {
+      "index": 212,
+      "x": 60.0,
+      "y": 37.3945,
+      "yaw_rad": -1.5708,
+      "yaw_deg": -90.0,
+      "direction": "倒车",
+      "curvature": 0.0
+    },
+    {
+      "index": 213,
+      "x": 60.0,
+      "y": 37.8945,
+      "yaw_rad": -1.5708,
+      "yaw_deg": -90.0,
+      "direction": "倒车",
+      "curvature": 0.0
+    },
+    {
+      "index": 214,
+      "x": 60.0,
+      "y": 38.3945,
+      "yaw_rad": -1.5708,
+      "yaw_deg": -90.0,
+      "direction": "倒车",
+      "curvature": 0.0
+    },
+    {
+      "index": 215,
+      "x": 60.0,
+      "y": 38.8945,
+      "yaw_rad": -1.5708,
+      "yaw_deg": -90.0,
+      "direction": "倒车",
+      "curvature": 0.0
+    },
+    {
+      "index": 216,
+      "x": 60.0,
+      "y": 39.3945,
+      "yaw_rad": -1.5708,
+      "yaw_deg": -90.0,
+      "direction": "倒车",
+      "curvature": 0.0
+    },
+    {
+      "index": 217,
+      "x": 60.0,
+      "y": 39.8945,
+      "yaw_rad": -1.5708,
+      "yaw_deg": -90.0,
+      "direction": "倒车",
+      "curvature": 0.0
+    },
+    {
+      "index": 218,
+      "x": 60.0,
+      "y": 40.3945,
+      "yaw_rad": -1.5708,
+      "yaw_deg": -90.0,
+      "direction": "倒车",
+      "curvature": 0.0
+    },
+    {
+      "index": 219,
+      "x": 60.0,
+      "y": 40.8945,
+      "yaw_rad": -1.5708,
+      "yaw_deg": -90.0,
+      "direction": "倒车",
+      "curvature": 0.0
+    },
+    {
+      "index": 220,
+      "x": 60.0,
+      "y": 41.3945,
+      "yaw_rad": -1.5708,
+      "yaw_deg": -90.0,
+      "direction": "倒车",
+      "curvature": 0.0
+    },
+    {
+      "index": 221,
+      "x": 60.0,
+      "y": 41.8945,
+      "yaw_rad": -1.5708,
+      "yaw_deg": -90.0,
+      "direction": "倒车",
+      "curvature": 0.0
+    },
+    {
+      "index": 222,
       "x": 60.0,
       "y": 42.0,
       "yaw_rad": -1.5708,
