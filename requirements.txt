@@ -1,0 +1,6 @@
+heapdict
+numpy
+matplotlib
+scipy
+imageio
+shapely
