@@ -69,8 +69,16 @@ class TrajectoryOptimizer:
             else:
                 start_constraint = None
 
+            # Apply end constraint (Goal Yaw) only for the LAST segment
+            end_constraint = None
+            if i == len(segments) - 1:
+                # This is the last segment, it must align with the goal yaw
+                # The goal yaw is the yaw of the last point of this segment
+                goal_yaw = segment['yaw'][-1]
+                end_constraint = goal_yaw
+
             # Phase 1: Path Smoothing (DL-IAPS)
-            smoothed_path = self._phase1_smooth_path(segment, collision_lookup, start_constraint)
+            smoothed_path = self._phase1_smooth_path(segment, collision_lookup, start_constraint, end_constraint)
             if smoothed_path is None:
                 print(f"[TrajectoryOptimizer] Smoothing failed for segment {i}, using original.")
                 smoothed_path = segment
@@ -139,11 +147,12 @@ class TrajectoryOptimizer:
         segments.append(curr_segment)
         return segments
 
-    def _phase1_smooth_path(self, segment, collision_lookup, start_constraint=None):
+    def _phase1_smooth_path(self, segment, collision_lookup, start_constraint=None, end_constraint=None):
         """
         Phase 1: DL-IAPS (Dual-Loop Iterative Anchoring Path Smoothing)
         Args:
             start_constraint: (x, y, yaw) tuple to fix the start pose
+            end_constraint: float (yaw) or None. If set, forces the last segment to align with this yaw.
         """
         """
         Phase 1: DL-IAPS (Dual-Loop Iterative Anchoring Path Smoothing)
@@ -163,7 +172,7 @@ class TrajectoryOptimizer:
         for iteration in range(self.ps_max_iter):
             # Inner Loop: Solve QP
             try:
-                opt_x, opt_y = self._solve_smoothing_qp(path_x, path_y, box_size, start_constraint)
+                opt_x, opt_y = self._solve_smoothing_qp(path_x, path_y, box_size, start_constraint, end_constraint)
             except Exception as e:
                 print(f"[Phase1] QP solver failed: {e}")
                 return None
@@ -231,7 +240,7 @@ class TrajectoryOptimizer:
         print("[Phase1] Max iterations reached.")
         return None
 
-    def _solve_smoothing_qp(self, ref_x, ref_y, box_size, start_constraint=None):
+    def _solve_smoothing_qp(self, ref_x, ref_y, box_size, start_constraint=None, end_constraint=None):
         """
         Construct and solve the SCP QP problem using cvxpy.
         """
@@ -254,6 +263,23 @@ class TrajectoryOptimizer:
         constraints += [
             P[N-1] == [ref_x[N-1], ref_y[N-1]]
         ]
+
+        if end_constraint is not None:
+            # Enforce Yaw Constraint at the End
+            # Constraint: P[N-2] must lie on the line passing through P[N-1] with angle end_constraint
+            # Line eq: sin(theta)*(x - x_g) - cos(theta)*(y - y_g) = 0
+            # where (x, y) is P[N-2] and (x_g, y_g) is P[N-1]
+            theta = end_constraint
+            # Note: P[N-1] is a variable, but constrained to be equal to ref[N-1]
+            # So we can use ref[N-1] or P[N-1]. P[N-1] preserves convex structure.
+            constraints += [
+                math.sin(theta) * (P[N-2, 0] - ref_x[N-1]) - math.cos(theta) * (P[N-2, 1] - ref_y[N-1]) == 0
+            ]
+            
+            # Also ensure direction? (Front or Back)
+            # The A* reference path puts P[N-2] in the correct relative position.
+            # The box constraints + smoothness should prevent it from flipping to the other side of P[N-1].
+
         
         # 2. Safety Box Constraints
         for k in range(1, N-1):
