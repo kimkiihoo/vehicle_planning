@@ -1,3 +1,4 @@
+
 # 内置库
 import heapq
 import math
@@ -20,15 +21,18 @@ LF = 4.51  # 后轴到车头的距离
 LB = 1.01  # 后轴到车尾的距离
 MAX_STEER = np.deg2rad(34)  # 最大转向角 [rad]
 
-# 规划成本参数
-SB_COST = 300.0  # 切换方向惩罚（高值避免频繁换向）
-BACK_COST = 1000.0  # 倒车惩罚（高值使搜索阶段尽量避免倒车）
-STEER_CHANGE_COST = 10.0  # 转向角变化惩罚
-STEER_COST = 25.0  # 转向角惩罚
-H_COST = 250.0  # 启发式成本（泊车场景）
-MAX_OBSTACLE_COST = 1000.0  # 障碍物最大代价
-DECAY_RATE = 6.0  # 代价衰减率（米）
-OBSTACLE_COST = 20.0  # 障碍物代价权重
+# 规划成本参数 (已优化)
+SB_COST = 300.0        # 切换方向惩罚（保持较高，避免频繁换向）
+BACK_COST = 50.0       # 倒车惩罚（降低，允许必要倒车）
+STEER_CHANGE_COST = 50.0  # 转向角变化惩罚（增加，惩罚“蛇形”走位）
+STEER_COST = 15.0      # 转向角惩罚（惩罚大角度转向）
+H_COST = 15.0          # 启发式权重（配合 RS 距离调整，避免 G 值主导导致退化为 Dijkstra）
+MAX_OBSTACLE_COST = 1000.0
+DECAY_RATE = 6.0
+OBSTACLE_COST = 20.0
+
+# 新增：偏离直线/目标方向惩罚
+STRAIGHT_COST = 5.0    # 惩罚偏离目标方向的角度差
 
 # 记录最近一次搜索的统计信息（供外部读取）
 LAST_ITER_NUM = 0
@@ -132,7 +136,8 @@ def calc_motion_inputs(config):
     """生成运动输入（转向角），包含前进和倒车"""
     for steer in np.concatenate((np.linspace(-MAX_STEER, MAX_STEER, config.n_steer), [0.0])):
         yield [steer, True]   # 前进
-        yield [steer, False]  # 倒车
+        # yield [steer, False]  # 倒车 (减少倒车搜索分支以加速，只在必要时如 Analytic Expansion 使用? 不，混合A*需要倒车能力)
+        yield [steer, False]
 
 
 def check_car_collision(xlist, ylist, yawlist, collision_lookup):
@@ -264,7 +269,12 @@ def calc_next_node(current, steer, direction, config, collision_lookup):
         addedcost += BACK_COST
     addedcost += STEER_COST * abs(steer)
     addedcost += STEER_CHANGE_COST * abs(current.steer - steer)
-    cost = current.cost + addedcost + arc_l
+    
+    # 距离代价：如果是倒车，距离代价适当加倍，促使向前
+    # 分离 Kinematic Cost 和 Euclidean Distance
+    dist_cost = arc_l if direction else arc_l * 1.2
+    
+    cost = current.cost + addedcost + dist_cost
 
     node = Node(xind, yind, yawind, direction, xlist, ylist, yawlist, directions,
                 pind=calc_index(current, config), cost=cost, steer=steer)
@@ -396,11 +406,14 @@ def hybrid_a_star_planning(start, goal, collision_lookup, config,
                   round(start[2] / config.yaw_resolution), True, [start[0]], [start[1]], [start[2]], [True], cost=0)
     ngoal = Node(round(goal[0] / config.xy_resolution), round(goal[1] / config.xy_resolution),
                  round(goal[2] / config.yaw_resolution), True, [goal[0]], [goal[1]], [goal[2]], [True])
+    
+    # 传递 goal 真实坐标给 calc_cost
+    goal_pose = goal
 
     openList, closedList = {}, {}
     pq = []
     openList[calc_index(nstart, config)] = nstart
-    heapq.heappush(pq, (calc_cost(nstart, goal, dist_map, config, cost_map, grid_resolution, x_min, y_min),
+    heapq.heappush(pq, (calc_cost(nstart, goal_pose, dist_map, config, cost_map, grid_resolution, x_min, y_min, True),
                         calc_index(nstart, config)))
 
     iter_num = 0
@@ -440,7 +453,7 @@ def hybrid_a_star_planning(start, goal, collision_lookup, config,
                 continue
             if neighbor_index not in openList or openList[neighbor_index].cost > neighbor.cost:
                 heapq.heappush(pq,
-                               (calc_cost(neighbor, goal, dist_map, config, cost_map, grid_resolution, x_min, y_min),
+                               (calc_cost(neighbor, goal_pose, dist_map, config, cost_map, grid_resolution, x_min, y_min),
                                 neighbor_index))
                 openList[neighbor_index] = neighbor
 
@@ -459,17 +472,43 @@ def hybrid_a_star_planning(start, goal, collision_lookup, config,
 
 
 def calc_cost(n, goal, dist_map, config, cost_map=None,
-              grid_resolution=0.1, x_min=0.0, y_min=0.0):
+              grid_resolution=0.1, x_min=0.0, y_min=0.0, is_start=False):
     """计算节点的总代价"""
     xind, yind = n.xind, n.yind
+    current_x = n.xlist[-1]
+    current_y = n.ylist[-1]
+    current_yaw = n.yawlist[-1]
 
-    # 启发式代价
+    # 1. 障碍物启发式 (Holonomic / Dijkstra)
     if dist_map:
-        h_cost = dist_map.get((xind, yind), sqrt((n.xlist[-1] - goal[0]) ** 2 + (n.ylist[-1] - goal[1]) ** 2))
+        h_dijkstra = dist_map.get((xind, yind), 
+                                  sqrt((current_x - goal[0]) ** 2 + (current_y - goal[1]) ** 2))
     else:
-        h_cost = sqrt((n.xlist[-1] - goal[0]) ** 2 + (n.ylist[-1] - goal[1]) ** 2)
+        h_dijkstra = sqrt((current_x - goal[0]) ** 2 + (current_y - goal[1]) ** 2)
+        
+    # 2. 运动学启发式 (Non-holonomic / Reeds-Shepp)
+    # 为了性能，仅在接近目标或间隔一定步数时计算，这里为简单起见每次都算
+    # 使用 Reeds-Shepp 曲线长度作为启发式
+    # 注意：generate_path 比较耗时，这里只计算 Optimal Length
+    max_curvature = math.tan(MAX_STEER) / WB
+    
+    # 简单的 RS 估算（直接调用库计算 paths 并取最小长度）
+    # 优化：如果是起点或者接近终点才精确计算，或者间隔计算？
+    # 为了效果，我们接受一定计算量增加。
+    # 这里我们只取 generate_path 的结果 (Path 列表) 的最小 L
+    qs = [current_x, current_y, current_yaw]
+    qg = [goal[0], goal[1], goal[2]]
+    # 调用 rs.generate_path(q0, q1, maxc) -> returns list of Path
+    rs_paths = rs.generate_path(qs, qg, max_curvature)
+    if rs_paths:
+        h_rs = min([p.L for p in rs_paths])
+    else:
+        h_rs = h_dijkstra # Fallback
 
-    # 障碍物代价
+    # 综合启发式：取最大值 (max is admissible)
+    h_cost = max(h_dijkstra, h_rs)
+    
+    # 3. 障碍物代价 (从CostMap读取)
     obstacle_cost = 0.0
     if cost_map is not None:
         x = xind * config.xy_resolution
@@ -479,7 +518,17 @@ def calc_cost(n, goal, dist_map, config, cost_map=None,
         if 0 <= px < cost_map.shape[1] and 0 <= py < cost_map.shape[0]:
             obstacle_cost = cost_map[py, px]
 
-    return n.cost + H_COST * h_cost + OBSTACLE_COST * obstacle_cost
+    # 4. 偏离直线代价 (Straight Deviation)
+    # 计算heading与目标方向的偏差，鼓励对齐目标
+    # 距离目标越远，越应该对齐 Goal
+    goal_angle = math.atan2(goal[1] - current_y, goal[0] - current_x)
+    angle_diff = abs(rs.pi_2_pi(goal_angle - current_yaw))
+    
+    # 简单策略：越接近目标，角度惩罚越重要？或者全程都很重要。
+    # 这里我们全程给一个偏离代价
+    straight_cost = STRAIGHT_COST * angle_diff
+
+    return n.cost + H_COST * h_cost + OBSTACLE_COST * obstacle_cost + straight_cost
 
 
 def get_final_path(closed, ngoal, nstart, config):

@@ -17,7 +17,7 @@ class TrajectoryOptimizer:
         self.ps_weight_smoothness = 10.0  # Weight for smoothness
         self.ps_weight_ref_deviation = 0.0 # Weight for deviation from original path
         self.ps_max_iter = 10            # Max iterations for outer loop
-        self.ps_box_margin = 0.5         # Initial safety box margin (m)
+        self.ps_box_margin = 0.75         # Initial safety box margin (m)
         self.ps_min_box_margin = 0.1     # Minimum safety box margin
         
         # Phase 2: Speed Profile Parameters
