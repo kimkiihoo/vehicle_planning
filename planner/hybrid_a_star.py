@@ -22,15 +22,15 @@ LB = 1.01  # 后轴到车尾的距离
 MAX_STEER = np.deg2rad(34)  # 最大转向角 [rad]
 
 # 规划成本参数
-SB_COST = 300.0        # 切换方向惩罚
-BACK_COST = 50.0       # 倒车惩罚
+SB_COST = 10000.0        # 切换方向惩罚
+BACK_COST = 10000.0       # 倒车惩罚
 STEER_CHANGE_COST = 50.0  # 转向角变化惩罚
 STEER_COST = 15.0      # 转向角惩罚
 H_COST = 18.0          # 启发式权重
 MAX_OBSTACLE_COST = 1000.0
 DECAY_RATE = 6.0
 OBSTACLE_COST = 20.0
-STRAIGHT_COST = 5.0    # 偏离直线惩罚
+STRAIGHT_COST = 150.0    # 偏离直线惩罚
 
 # 记录最近一次搜索的统计信息
 LAST_ITER_NUM = 0
@@ -238,8 +238,11 @@ def move(x, y, yaw, distance, steer, L=WB):
     return x, y, yaw
 
 
-def get_neighbors(current, config, collision_lookup, cost_map, x_min, y_min, grid_res):
-    """Adaptive Step Size"""
+def get_neighbors(current, config, collision_lookup, cost_map, x_min, y_min, grid_res, goal):
+    """
+    获取邻居节点 (Adaptive Step Size & Reverse Restriction)
+    """
+    # 查询当前位置的障碍物距离代价
     current_obs_cost = 0
     if cost_map is not None:
         px = int((current.xlist[-1] - x_min) / grid_res)
@@ -247,16 +250,36 @@ def get_neighbors(current, config, collision_lookup, cost_map, x_min, y_min, gri
         if 0 <= px < cost_map.shape[1] and 0 <= py < cost_map.shape[0]:
             current_obs_cost = cost_map[py, px]
             
+    # 自适应步长
     step_scale = 1.0
     if current_obs_cost < 50.0: 
         step_scale = 1.6
     elif current_obs_cost < 200.0:
         step_scale = 1.2
         
+    # 距离目标直线的距离 (Euclidean Distance)
+    dist_to_goal = math.hypot(current.xlist[-1] - goal[0], current.ylist[-1] - goal[1])
+    
+    # 倒车限制阈值 (米)
+    REVERSE_DIST_THRESHOLD = 20.0 
+
     for steer, d in calc_motion_inputs(config):
+        # 策略：非必要不倒车，但若无路可走不得不倒车时允许
+        # 修改逻辑：不再强制 continue，而是给予额外惩罚
+        
+        extra_penalty = 0.0
+        if not d: # 试图倒车
+            if dist_to_goal > REVERSE_DIST_THRESHOLD:
+                if current.direction:
+                     # 距离远且试图从前进切换到倒车 -> 施加巨大惩罚
+                     # 这样只有在前进无解（无其他neighbor或cost极大）时才会被采纳
+                     extra_penalty = 5000.0 
+
         node = calc_next_node(current, steer, d, config, collision_lookup, step_scale)
         if node and verify_index(node, config):
+            node.cost += extra_penalty
             yield node
+
 
 
 def calc_next_node(current, steer, direction, config, collision_lookup, step_scale=1.0):
@@ -317,6 +340,19 @@ def analytic_expansion(current, goal, config, collision_lookup):
 
     best_path, best = None, None
     for path in paths:
+        # Check gear switches
+        n_switches = 0
+        for i in range(len(path.directions) - 1):
+            if path.directions[i] != path.directions[i+1]:
+                n_switches += 1
+        
+        # 严格限制：不允许RS路径内部换向
+        # 这意味着RS部分必须是纯前进或纯倒车 (单次操作)
+        # 结合A*的前进搜索，最终路径将是 Fwd(A*) -> Fwd/Bwd(RS)
+        # 也就是最多 1 次换向 (泊车通常是 Fwd->Bwd)
+        if n_switches > 0:
+            continue
+            
         if not check_car_collision(path.x, path.y, path.yaw, collision_lookup):
             l_back = sum(abs(l) for l in path.lengths if l < 0)
             b_num = sum(1 for l in path.lengths if l < 0)
@@ -418,7 +454,7 @@ def hybrid_a_star_planning(start, goal, collision_lookup, config,
                 print("成功使用Reeds-Shepp曲线连接到目标!")
                 break
 
-        for neighbor in get_neighbors(current, config, collision_lookup, cost_map, x_min, y_min, grid_resolution):
+        for neighbor in get_neighbors(current, config, collision_lookup, cost_map, x_min, y_min, grid_resolution, goal):
             neighbor_index = calc_index(neighbor, config)
             if neighbor_index in closedList:
                 continue

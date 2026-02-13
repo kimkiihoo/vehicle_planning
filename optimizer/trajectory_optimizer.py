@@ -45,17 +45,40 @@ class TrajectoryOptimizer:
         segments = self._split_path_by_gear(path)
         
         opt_x, opt_y, opt_yaw, opt_v, opt_a, opt_t = [], [], [], [], [], []
+        segments_output = []  # To store partitioned trajectories
         current_time = 0.0
         
+        # Constraint for continuity: end state of previous segment
+        prev_end_state = None
+
         for i, segment in enumerate(segments):
             print(f"[TrajectoryOptimizer] Optimizing segment {i+1}/{len(segments)} (Direction: {'Fwd' if segment['direction'] else 'Bwd'})...")
             
+            # Apply start constraint if available
+            if prev_end_state:
+                # Force the start of this segment to match the end of previous
+                # Note: The split logic preserved the point, but we need to ensure 
+                # optimization respects the exact coordinates AND YAW.
+                # Actually, only coordinates are constrained in QP. Yaw is derivative.
+                # But we should use the exact coord as anchor.
+                segment['x'][0] = prev_end_state[0]
+                segment['y'][0] = prev_end_state[1]
+                # Yaw constraint is tricky in position-based QP. 
+                # We mainly ensure position continuity here.
+                start_constraint = prev_end_state
+            else:
+                start_constraint = None
+
             # Phase 1: Path Smoothing (DL-IAPS)
-            smoothed_path = self._phase1_smooth_path(segment, collision_lookup)
+            smoothed_path = self._phase1_smooth_path(segment, collision_lookup, start_constraint)
             if smoothed_path is None:
                 print(f"[TrajectoryOptimizer] Smoothing failed for segment {i}, using original.")
                 smoothed_path = segment
             
+            # Update prev_end_state for next iteration
+            # Use the optimized end point
+            prev_end_state = (smoothed_path['x'][-1], smoothed_path['y'][-1], smoothed_path['yaw'][-1])
+
             # Phase 2: Speed Profile (PJSO)
             speed_profile = self._phase2_speed_profile(smoothed_path)
             
@@ -66,6 +89,17 @@ class TrajectoryOptimizer:
             
             seg_t = speed_profile['t'] + current_time
             
+            # Store segment
+            segments_output.append({
+                'x': speed_profile['x'].tolist() if isinstance(speed_profile['x'], np.ndarray) else speed_profile['x'],
+                'y': speed_profile['y'].tolist() if isinstance(speed_profile['y'], np.ndarray) else speed_profile['y'],
+                'yaw': speed_profile['yaw'].tolist() if isinstance(speed_profile['yaw'], np.ndarray) else speed_profile['yaw'],
+                'v': speed_profile['v'].tolist() if isinstance(speed_profile['v'], np.ndarray) else speed_profile['v'],
+                'a': speed_profile['a'].tolist() if isinstance(speed_profile['a'], np.ndarray) else speed_profile['a'],
+                't': seg_t.tolist() if isinstance(seg_t, np.ndarray) else seg_t,
+                'direction': segment['direction']
+            })
+
             opt_x.extend(speed_profile['x'][start_idx:])
             opt_y.extend(speed_profile['y'][start_idx:])
             opt_yaw.extend(speed_profile['yaw'][start_idx:])
@@ -78,7 +112,8 @@ class TrajectoryOptimizer:
         print("[TrajectoryOptimizer] Optimization finished.")
         return {
             'x': opt_x, 'y': opt_y, 'yaw': opt_yaw,
-            'v': opt_v, 'a': opt_a, 't': opt_t
+            'v': opt_v, 'a': opt_a, 't': opt_t,
+            'segments': segments_output  # New: Formal Trajectory Partition
         }
 
     def _split_path_by_gear(self, path):
@@ -104,7 +139,12 @@ class TrajectoryOptimizer:
         segments.append(curr_segment)
         return segments
 
-    def _phase1_smooth_path(self, segment, collision_lookup):
+    def _phase1_smooth_path(self, segment, collision_lookup, start_constraint=None):
+        """
+        Phase 1: DL-IAPS (Dual-Loop Iterative Anchoring Path Smoothing)
+        Args:
+            start_constraint: (x, y, yaw) tuple to fix the start pose
+        """
         """
         Phase 1: DL-IAPS (Dual-Loop Iterative Anchoring Path Smoothing)
         """
@@ -119,10 +159,11 @@ class TrajectoryOptimizer:
         box_size = np.full(N, self.ps_box_margin)
         
         # Iteration loop
+        # Iteration loop
         for iteration in range(self.ps_max_iter):
             # Inner Loop: Solve QP
             try:
-                opt_x, opt_y = self._solve_smoothing_qp(path_x, path_y, box_size)
+                opt_x, opt_y = self._solve_smoothing_qp(path_x, path_y, box_size, start_constraint)
             except Exception as e:
                 print(f"[Phase1] QP solver failed: {e}")
                 return None
@@ -141,12 +182,20 @@ class TrajectoryOptimizer:
                     if not segment['direction']: # Reverse
                        yaw = math.atan2(-dy, -dx)
                 else:
-                    # Better: use previous segment yaw
-                    dx = opt_x[k] - opt_x[k-1]
-                    dy = opt_y[k] - opt_y[k-1]
-                    yaw = math.atan2(dy, dx)
-                    if not segment['direction']:
-                       yaw = math.atan2(-dy, -dx)
+                    # Use previous segment yaw if possible, or extrapolate
+                    if k > 0:
+                        dx = opt_x[k] - opt_x[k-1]
+                        dy = opt_y[k] - opt_y[k-1]
+                        yaw = math.atan2(dy, dx)
+                        if not segment['direction']:
+                           yaw = math.atan2(-dy, -dx)
+                    elif start_constraint:
+                        # If first point and constrained, use constraint yaw? 
+                        # Actually k=0 is fixed to start_constraint[0:2].
+                        # But we need yaw for collision check.
+                        yaw = start_constraint[2]
+                    else:
+                        yaw = segment['yaw'][k] # Fallback
                 
                 if collision_lookup.collision_detection(opt_x[k], opt_y[k], yaw):
                     if k != 0 and k != N-1: # Start/End are fixed, assume safe
@@ -182,7 +231,7 @@ class TrajectoryOptimizer:
         print("[Phase1] Max iterations reached.")
         return None
 
-    def _solve_smoothing_qp(self, ref_x, ref_y, box_size):
+    def _solve_smoothing_qp(self, ref_x, ref_y, box_size, start_constraint=None):
         """
         Construct and solve the SCP QP problem using cvxpy.
         """
@@ -193,8 +242,16 @@ class TrajectoryOptimizer:
         constraints = []
         
         # 1. Boundary constraints (Fixed Start & End)
+        # Start is fixed to ref_x[0], ref_y[0] or start_constraint
+        # Actually ref_x[0] IS the start constraint if we passed it correctly?
+        # Yes, we updated segment['x'][0] before calling this.
+        # But to be explicit and safe:
+        if start_constraint is not None:
+             constraints += [P[0] == [start_constraint[0], start_constraint[1]]]
+        else:
+             constraints += [P[0] == [ref_x[0], ref_y[0]]]
+
         constraints += [
-            P[0] == [ref_x[0], ref_y[0]],
             P[N-1] == [ref_x[N-1], ref_y[N-1]]
         ]
         
@@ -274,7 +331,9 @@ class TrajectoryOptimizer:
             s[0] == 0.0,
             v[0] == 0.0,
             v[N-1] == 0.0,
-            s[N-1] == total_s
+            s[N-1] == total_s,
+            a[0] == 0.0,     # Force stop with zero acceleration
+            a[N-1] == 0.0    # Force stop with zero acceleration
         ]
         
         # 3. Physical Limits
