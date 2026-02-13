@@ -21,26 +21,28 @@ LF = 4.51  # 后轴到车头的距离
 LB = 1.01  # 后轴到车尾的距离
 MAX_STEER = np.deg2rad(34)  # 最大转向角 [rad]
 
-# 规划成本参数 (已优化)
-SB_COST = 300.0        # 切换方向惩罚（保持较高，避免频繁换向）
-BACK_COST = 50.0       # 倒车惩罚（降低，允许必要倒车）
-STEER_CHANGE_COST = 50.0  # 转向角变化惩罚（增加，惩罚“蛇形”走位）
-STEER_COST = 15.0      # 转向角惩罚（惩罚大角度转向）
-H_COST = 15.0          # 启发式权重（配合 RS 距离调整，避免 G 值主导导致退化为 Dijkstra）
+# 规划成本参数
+SB_COST = 300.0        # 切换方向惩罚
+BACK_COST = 50.0       # 倒车惩罚
+STEER_CHANGE_COST = 50.0  # 转向角变化惩罚
+STEER_COST = 15.0      # 转向角惩罚
+H_COST = 18.0          # 启发式权重
 MAX_OBSTACLE_COST = 1000.0
 DECAY_RATE = 6.0
 OBSTACLE_COST = 20.0
+STRAIGHT_COST = 5.0    # 偏离直线惩罚
 
-# 新增：偏离直线/目标方向惩罚
-STRAIGHT_COST = 5.0    # 惩罚偏离目标方向的角度差
-
-# 记录最近一次搜索的统计信息（供外部读取）
+# 记录最近一次搜索的统计信息
 LAST_ITER_NUM = 0
 LAST_SEARCH_TIME = 0.0
+LAST_PATH_LENGTH = 0.0
 
+# 优化参数
+COARSE_GRID_RES = 1.0 # 粗栅格分辨率 (1.0m) 用于Dijkstra启发式
+RS_HEURISTIC_DIST = 20.0 # 只有距离目标小于此值时才启用RS启发式
 
 class Config:
-    """规划器配置（直接接受地图边界参数）"""
+    """规划器配置"""
     def __init__(self, x_min, y_min, x_max, y_max,
                  xy_resolution=1.0, yaw_resolution=np.deg2rad(5),
                  motion_resolution=0.3, n_steer=11, grid_resolution=0.1):
@@ -66,8 +68,6 @@ class Config:
 class Node:
     def __init__(self, xind, yind, yawind, direction, xlist, ylist, yawlist, directions,
                  steer=0.0, pind=None, cost=None):
-        if len(xlist) != len(directions):
-            raise ValueError(f"Directions length {len(directions)} does not match xlist length {len(xlist)}")
         self.xind = xind
         self.yind = yind
         self.yawind = yawind
@@ -83,8 +83,6 @@ class Node:
 
 class Path:
     def __init__(self, xlist, ylist, yawlist, directionlist, cost):
-        if len(xlist) != len(directionlist):
-            raise ValueError(f"Directionlist length {len(directionlist)} does not match xlist length {len(xlist)}")
         self.xlist = xlist
         self.ylist = ylist
         self.yawlist = yawlist
@@ -93,11 +91,8 @@ class Path:
 
 
 def generate_obstacle_cost_map(grid_map, config):
-    """生成障碍物代价地图
-    
-    Args:
-        grid_map: numpy 数组, 0=障碍, 1=空闲
-        config: Config 对象
+    """
+    生成障碍物代价地图 (Fine Grid)
     """
     if grid_map is None:
         return None
@@ -108,15 +103,14 @@ def generate_obstacle_cost_map(grid_map, config):
     queue = deque()
     visited = set()
 
-    # 标记所有障碍物像素
-    for py in range(height):
-        for px in range(width):
-            if grid_map[py, px] == 0:
-                cost_map[py, px] = MAX_OBSTACLE_COST
-                queue.append((px, py, 0))
-                visited.add((px, py))
+    # 标记障碍物
+    obstacles = np.where(grid_map == 0)
+    cost_map[obstacles] = MAX_OBSTACLE_COST
+    for r, c in zip(obstacles[0], obstacles[1]):
+        queue.append((c, r, 0))
+        visited.add((c, r))
 
-    # 使用BFS计算距离衰减的代价
+    # BFS
     while queue:
         px, py, dist = queue.popleft()
         for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
@@ -124,131 +118,158 @@ def generate_obstacle_cost_map(grid_map, config):
             if 0 <= nx < width and 0 <= ny < height and (nx, ny) not in visited:
                 if grid_map[ny, nx] != 0:
                     distance_m = (dist + 1) * config.grid_resolution
+                    if distance_m > 4.0: 
+                        continue
                     calculated_cost = MAX_OBSTACLE_COST * math.exp(-distance_m / DECAY_RATE)
                     cost_map[ny, nx] = calculated_cost
                     visited.add((nx, ny))
                     queue.append((nx, ny, dist + 1))
-
     return cost_map
 
 
+def precompute_collision_map(config, grid_map, grid_resolution, x_min, y_min):
+    """预计算碰撞地图 (Hybrid A* Grid Resolution)"""
+    width = config.maxx - config.minx + 1
+    height = config.maxy - config.miny + 1
+    collision_map = np.zeros((width, height), dtype=np.bool_)
+    
+    x_indices = np.arange(config.minx, config.maxx + 1)
+    y_indices = np.arange(config.miny, config.maxy + 1)
+    
+    for xi, xind in enumerate(x_indices):
+        for yi, yind in enumerate(y_indices):
+            x = xind * config.xy_resolution
+            y = yind * config.xy_resolution
+            px = int((x - x_min) / grid_resolution)
+            py = int((y - y_min) / grid_resolution)
+            if 0 <= px < grid_map.shape[1] and 0 <= py < grid_map.shape[0]:
+                if grid_map[py, px] == 0:
+                     collision_map[xi, yi] = True
+    return collision_map
+
+
+def dijkstra_distance_map(goal, config, grid_map, grid_resolution, x_min, y_min):
+    """
+    使用粗栅格 (Coarse Grid) 计算Dijkstra启发式
+    """
+    start_time = time.time()
+    
+    # 1. 降采样地图
+    scale = COARSE_GRID_RES / grid_resolution
+    coarse_h = int(grid_map.shape[0] / scale)
+    coarse_w = int(grid_map.shape[1] / scale)
+    
+    coarse_map = np.zeros((coarse_h, coarse_w), dtype=np.int8) 
+    
+    obs_y, obs_x = np.where(grid_map == 0)
+    coarse_obs_y = (obs_y / scale).astype(int)
+    coarse_obs_x = (obs_x / scale).astype(int)
+    
+    valid_mask = (coarse_obs_x >= 0) & (coarse_obs_x < coarse_w) & \
+                 (coarse_obs_y >= 0) & (coarse_obs_y < coarse_h)
+    
+    coarse_map.fill(1) 
+    coarse_map[coarse_obs_y[valid_mask], coarse_obs_x[valid_mask]] = 0 
+    
+    # 2. 运行 Dijkstra
+    cg_goal_x = int((goal[0] - x_min) / COARSE_GRID_RES)
+    cg_goal_y = int((goal[1] - y_min) / COARSE_GRID_RES)
+    
+    if 0 <= cg_goal_x < coarse_w and 0 <= cg_goal_y < coarse_h:
+         if coarse_map[cg_goal_y, cg_goal_x] == 0:
+             print("[Dijkstra] 警告：目标点在粗栅格障碍物上，尝试寻找最近空闲点...")
+             found = False
+             for dx in range(-2, 3):
+                 for dy in range(-2, 3):
+                     nx, ny = cg_goal_x + dx, cg_goal_y + dy
+                     if 0 <= nx < coarse_w and 0 <= ny < coarse_h and coarse_map[ny, nx] == 1:
+                         cg_goal_x, cg_goal_y = nx, ny
+                         found = True
+                         break
+                 if found: break
+    
+    dist_map = np.full((coarse_h, coarse_w), np.inf)
+    dist_map[cg_goal_y, cg_goal_x] = 0
+    
+    pq = [(0, cg_goal_x, cg_goal_y)]
+    
+    motions = [(1, 0, 1.0), (0, 1, 1.0), (-1, 0, 1.0), (0, -1, 1.0),
+               (1, 1, 1.414), (1, -1, 1.414), (-1, 1, 1.414), (-1, -1, 1.414)]
+    
+    while pq:
+        d, cx, cy = heapq.heappop(pq)
+        if d > dist_map[cy, cx]: continue
+        
+        for dx, dy, cost_mult in motions:
+            nx, ny = cx + dx, cy + dy
+            if 0 <= nx < coarse_w and 0 <= ny < coarse_h:
+                if coarse_map[ny, nx] == 1:
+                    new_dist = d + COARSE_GRID_RES * cost_mult
+                    if new_dist < dist_map[ny, nx]:
+                        dist_map[ny, nx] = new_dist
+                        heapq.heappush(pq, (new_dist, nx, ny))
+    
+    end_time = time.time()
+    print(f"[Dijkstra] Coarse Grid ({coarse_w}x{coarse_h}) 计算用时: {end_time - start_time:.2f}秒")
+    return dist_map
+
+
 def calc_motion_inputs(config):
-    """生成运动输入（转向角），包含前进和倒车"""
     for steer in np.concatenate((np.linspace(-MAX_STEER, MAX_STEER, config.n_steer), [0.0])):
-        yield [steer, True]   # 前进
-        # yield [steer, False]  # 倒车 (减少倒车搜索分支以加速，只在必要时如 Analytic Expansion 使用? 不，混合A*需要倒车能力)
+        yield [steer, True]
         yield [steer, False]
 
 
 def check_car_collision(xlist, ylist, yawlist, collision_lookup):
-    """
-    对连续轨迹点做碰撞检测，返回 True 表示有碰撞
-    """
     for x, y, yaw in zip(xlist, ylist, yawlist):
         if collision_lookup.collision_detection(x, y, yaw):
             return True
     return False
 
 
-def precompute_collision_map(config, grid_map, grid_resolution, x_min, y_min):
-    """预计算碰撞地图"""
-    width = config.maxx - config.minx + 1
-    height = config.maxy - config.miny + 1
-    collision_map = np.zeros((width, height), dtype=np.bool_)
-
-    obstacle_map = (grid_map == 0)
-
-    for xind in range(config.minx, config.maxx + 1):
-        for yind in range(config.miny, config.maxy + 1):
-            x = xind * config.xy_resolution
-            y = yind * config.xy_resolution
-            px = math.floor((x - x_min) / grid_resolution)
-            py = math.floor((y - y_min) / grid_resolution)
-            if 0 <= px < grid_map.shape[1] and 0 <= py < grid_map.shape[0]:
-                collision_map[xind - config.minx, yind - config.miny] = obstacle_map[py, px]
-
-    return collision_map
-
-
-def dijkstra_distance_map(goal, config, grid_map, grid_resolution, x_min, y_min):
-    """使用Dijkstra算法计算到目标的距离地图"""
-    start_time = time.time()
-    gx = round(goal[0] / config.xy_resolution)
-    gy = round(goal[1] / config.xy_resolution)
-
-    collision_map = precompute_collision_map(config, grid_map, grid_resolution, x_min, y_min)
-    if collision_map[gx - config.minx, gy - config.miny]:
-        print("[Dijkstra] 警告：目标点在障碍物上！")
-        return {}
-
-    width = config.maxx - config.minx + 1
-    height = config.maxy - config.miny + 1
-    dist_map_array = np.full((width, height), np.inf)
-    dist_map_array[gx - config.minx, gy - config.miny] = 0
-
-    max_dist = 600.0
-    pq = [(0, (gx, gy))]
-    visited = set()
-
-    while pq:
-        dist, (xind, yind) = heapq.heappop(pq)
-        if (xind, yind) in visited:
-            continue
-        visited.add((xind, yind))
-        for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
-            nx, ny = xind + dx, yind + dy
-            if not (config.minx <= nx <= config.maxx and config.miny <= ny <= config.maxy):
-                continue
-            if collision_map[nx - config.minx, ny - config.miny]:
-                continue
-            new_dist = dist + config.xy_resolution
-            if new_dist > max_dist:
-                continue
-            if new_dist < dist_map_array[nx - config.minx, ny - config.miny]:
-                dist_map_array[nx - config.minx, ny - config.miny] = new_dist
-                heapq.heappush(pq, (new_dist, (nx, ny)))
-
-    dist_map = {}
-    for xind in range(config.minx, config.maxx + 1):
-        for yind in range(config.miny, config.maxy + 1):
-            dist = dist_map_array[xind - config.minx, yind - config.miny]
-            if dist != np.inf:
-                dist_map[(xind, yind)] = dist
-
-    end_time = time.time()
-    print(f"[Dijkstra] 计算用时: {end_time - start_time:.2f}秒")
-    return dist_map
-
-
 def pi_2_pi(angle):
-    """将角度归一化到[-pi, pi]"""
     return (angle + pi) % (2 * pi) - pi
 
 
 def move(x, y, yaw, distance, steer, L=WB):
-    """车辆运动模型"""
     x += distance * cos(yaw)
     y += distance * sin(yaw)
     yaw += pi_2_pi(distance * tan(steer) / L)
     return x, y, yaw
 
 
-def get_neighbors(current, config, collision_lookup):
-    """获取当前节点的邻居节点"""
+def get_neighbors(current, config, collision_lookup, cost_map, x_min, y_min, grid_res):
+    """Adaptive Step Size"""
+    current_obs_cost = 0
+    if cost_map is not None:
+        px = int((current.xlist[-1] - x_min) / grid_res)
+        py = int((current.ylist[-1] - y_min) / grid_res)
+        if 0 <= px < cost_map.shape[1] and 0 <= py < cost_map.shape[0]:
+            current_obs_cost = cost_map[py, px]
+            
+    step_scale = 1.0
+    if current_obs_cost < 50.0: 
+        step_scale = 1.6
+    elif current_obs_cost < 200.0:
+        step_scale = 1.2
+        
     for steer, d in calc_motion_inputs(config):
-        node = calc_next_node(current, steer, d, config, collision_lookup)
+        node = calc_next_node(current, steer, d, config, collision_lookup, step_scale)
         if node and verify_index(node, config):
             yield node
 
 
-def calc_next_node(current, steer, direction, config, collision_lookup):
-    """计算下一个节点"""
+def calc_next_node(current, steer, direction, config, collision_lookup, step_scale=1.0):
     x, y, yaw = current.xlist[-1], current.ylist[-1], current.yawlist[-1]
-    arc_l = config.xy_resolution * 1.5
+    
+    arc_l = config.xy_resolution * 1.5 * step_scale
+    
     xlist, ylist, yawlist, directions = [], [], [], []
-
-    for dist in np.arange(0, arc_l, config.motion_resolution):
-        nx, ny, nyaw = move(x, y, yaw, config.motion_resolution * (1 if direction else -1), steer)
+    steps = max(2, int(arc_l / config.motion_resolution))
+    dt = arc_l / steps
+    
+    for _ in range(steps):
+        nx, ny, nyaw = move(x, y, yaw, dt * (1 if direction else -1), steer)
         xlist.append(nx)
         ylist.append(ny)
         yawlist.append(nyaw)
@@ -270,8 +291,6 @@ def calc_next_node(current, steer, direction, config, collision_lookup):
     addedcost += STEER_COST * abs(steer)
     addedcost += STEER_CHANGE_COST * abs(current.steer - steer)
     
-    # 距离代价：如果是倒车，距离代价适当加倍，促使向前
-    # 分离 Kinematic Cost 和 Euclidean Distance
     dist_cost = arc_l if direction else arc_l * 1.2
     
     cost = current.cost + addedcost + dist_cost
@@ -282,39 +301,33 @@ def calc_next_node(current, steer, direction, config, collision_lookup):
 
 
 def is_same_grid(n1, n2):
-    """检查两个节点是否在同一网格"""
     return n1.xind == n2.xind and n1.yind == n2.yind and n1.yawind == n2.yawind
 
 
 def analytic_expansion(current, goal, config, collision_lookup):
-    """使用Reeds-Shepp曲线进行解析扩展"""
     sx, sy, syaw = current.xlist[-1], current.ylist[-1], current.yawlist[-1]
     gx, gy, gyaw = goal.xlist[-1], goal.ylist[-1], goal.yawlist[-1]
-
-    # 泊车场景使用最大曲率
     max_curvature = math.tan(MAX_STEER) / WB
+    
+    dist = math.hypot(sx - gx, sy - gy)
+    if dist > 30.0: return None
 
     paths = rs.calc_paths(sx, sy, syaw, gx, gy, gyaw, max_curvature, step_size=config.motion_resolution)
-    if not paths:
-        return None
+    if not paths: return None
 
     best_path, best = None, None
     for path in paths:
         if not check_car_collision(path.x, path.y, path.yaw, collision_lookup):
-            # 泊车场景的路径选择标准
             l_back = sum(abs(l) for l in path.lengths if l < 0)
             b_num = sum(1 for l in path.lengths if l < 0)
-
             cost = calc_rs_path_cost(path) + b_num * 100000
             if not best or best > cost:
                 best = cost
                 best_path = path
-
     return best_path
 
 
 def update_node_with_analystic_expantion(current, goal, config, collision_lookup):
-    """使用解析扩展更新节点"""
     apath = analytic_expansion(current, goal, config, collision_lookup)
     if apath:
         fx = apath.x[1:]
@@ -323,8 +336,7 @@ def update_node_with_analystic_expantion(current, goal, config, collision_lookup
         fcost = current.cost + calc_rs_path_cost(apath)
         fpind = calc_index(current, config)
         fd = [bool(d) for d in apath.directions[1:]]
-        if len(fd) != len(fx):
-            fd = fd[:len(fx)]
+        if len(fd) != len(fx): fd = fd[:len(fx)]
         fsteer = 0.0
         fpath = Node(current.xind, current.yind, current.yawind,
                      current.direction, fx, fy, fyaw, fd,
@@ -334,38 +346,21 @@ def update_node_with_analystic_expantion(current, goal, config, collision_lookup
 
 
 def calc_rs_path_cost(rspath):
-    """计算Reeds-Shepp路径的代价"""
     cost = 0.0
-    # 基本路径长度代价
     for l, d in zip(rspath.lengths, rspath.directions):
-        if d:
-            cost += l
-        else:
-            # 泊车场景的倒车惩罚
-            cost += abs(l) * (BACK_COST + 5.0)
-
-    # 方向切换代价
+        if d: cost += l
+        else: cost += abs(l) * (BACK_COST + 5.0)
     for i in range(len(rspath.lengths) - 1):
-        if rspath.directions[i] != rspath.directions[i + 1]:
-            cost += SB_COST
-
-    # 转向代价
+        if rspath.directions[i] != rspath.directions[i + 1]: cost += SB_COST
     for ctype in rspath.ctypes:
-        if ctype != "S":
-            cost += STEER_COST * abs(MAX_STEER)
-
-    # 转向变化代价
+        if ctype != "S": cost += STEER_COST * abs(MAX_STEER)
     nctypes = len(rspath.ctypes)
     ulist = [0.0] * nctypes
     for i in range(nctypes):
-        if rspath.ctypes[i] == "R":
-            ulist[i] = -MAX_STEER
-        elif rspath.ctypes[i] == "L":
-            ulist[i] = MAX_STEER
-
+        if rspath.ctypes[i] == "R": ulist[i] = -MAX_STEER
+        elif rspath.ctypes[i] == "L": ulist[i] = MAX_STEER
     for i in range(len(rspath.ctypes) - 1):
         cost += STEER_CHANGE_COST * abs(ulist[i + 1] - ulist[i])
-
     return cost
 
 
@@ -373,54 +368,36 @@ def hybrid_a_star_planning(start, goal, collision_lookup, config,
                            grid_map=None, grid_resolution=0.1,
                            x_min=0.0, y_min=0.0,
                            use_dijkstra=True, rs_dist=44):
-    """混合A*路径规划主函数
-    
-    Args:
-        start: [x, y, yaw] 起点
-        goal: [x, y, yaw] 终点
-        collision_lookup: CollisionLookup 对象
-        config: Config 对象
-        grid_map: 栅格地图 numpy 数组 (0=障碍, 1=空闲)
-        grid_resolution: 栅格分辨率(米)
-        x_min, y_min: 栅格原点对应的世界坐标
-        use_dijkstra: 是否使用Dijkstra启发式
-        rs_dist: Reeds-Shepp连接距离阈值
-    
-    Returns:
-        Path 对象或 None
-    """
     print("开始混合A*路径规划!")
-    from time import time as _time
-    t0 = _time()
+    t0 = time.time()
 
     start[2], goal[2] = rs.pi_2_pi(start[2]), rs.pi_2_pi(goal[2])
 
     cost_map = None
-    dist_map = {}
+    dist_map = {} # Coarse grid dijkstra map
+    
     if use_dijkstra and grid_map is not None:
         cost_map = generate_obstacle_cost_map(grid_map, config)
         dist_map = dijkstra_distance_map(goal, config, grid_map, grid_resolution, x_min, y_min)
 
-    # 初始化起始和目标节点
     nstart = Node(round(start[0] / config.xy_resolution), round(start[1] / config.xy_resolution),
                   round(start[2] / config.yaw_resolution), True, [start[0]], [start[1]], [start[2]], [True], cost=0)
     ngoal = Node(round(goal[0] / config.xy_resolution), round(goal[1] / config.xy_resolution),
                  round(goal[2] / config.yaw_resolution), True, [goal[0]], [goal[1]], [goal[2]], [True])
     
-    # 传递 goal 真实坐标给 calc_cost
     goal_pose = goal
-
     openList, closedList = {}, {}
     pq = []
     openList[calc_index(nstart, config)] = nstart
-    heapq.heappush(pq, (calc_cost(nstart, goal_pose, dist_map, config, cost_map, grid_resolution, x_min, y_min, True),
+    
+    heapq.heappush(pq, (calc_cost(nstart, goal_pose, dist_map, config, cost_map, grid_resolution, x_min, y_min),
                         calc_index(nstart, config)))
 
     iter_num = 0
     fpath = None
+    
     while True:
         iter_num += 1
-
         if not openList:
             print("无法找到路径，开放列表为空!")
             return None
@@ -432,13 +409,8 @@ def hybrid_a_star_planning(start, goal, collision_lookup, config,
         else:
             continue
 
-        # 计算到目标的距离
-        if use_dijkstra and dist_map:
-            dist = dist_map.get((current.xind, current.yind), float('inf'))
-        else:
-            dist = sqrt((current.xlist[-1] - goal[0]) ** 2 + (current.ylist[-1] - goal[1]) ** 2)
+        dist = math.hypot(current.xlist[-1] - goal[0], current.ylist[-1] - goal[1])
 
-        # 尝试使用Reeds-Shepp曲线连接到目标
         if dist < rs_dist:
             isupdated, fpath = update_node_with_analystic_expantion(
                 current, ngoal, config, collision_lookup)
@@ -446,8 +418,7 @@ def hybrid_a_star_planning(start, goal, collision_lookup, config,
                 print("成功使用Reeds-Shepp曲线连接到目标!")
                 break
 
-        # 扩展邻居节点
-        for neighbor in get_neighbors(current, config, collision_lookup):
+        for neighbor in get_neighbors(current, config, collision_lookup, cost_map, x_min, y_min, grid_resolution):
             neighbor_index = calc_index(neighbor, config)
             if neighbor_index in closedList:
                 continue
@@ -457,124 +428,102 @@ def hybrid_a_star_planning(start, goal, collision_lookup, config,
                                 neighbor_index))
                 openList[neighbor_index] = neighbor
 
-        if iter_num > 120000:
+        if iter_num > 100000:
             print("无法找到路径，超过迭代限制!")
             return None
 
     path = get_final_path(closedList, fpath, nstart, config)
-    search_time = _time() - t0
-    global LAST_ITER_NUM, LAST_SEARCH_TIME
+    search_time = time.time() - t0
+    
+    path_len = 0.0
+    for i in range(len(path.xlist) - 1):
+        path_len += math.hypot(path.xlist[i+1]-path.xlist[i], path.ylist[i+1]-path.ylist[i])
+    
+    global LAST_ITER_NUM, LAST_SEARCH_TIME, LAST_PATH_LENGTH
     LAST_ITER_NUM = iter_num
     LAST_SEARCH_TIME = search_time
+    LAST_PATH_LENGTH = path_len
+    
     print(f"混合A*迭代次数：{iter_num}次，用时：{search_time:.2f}秒")
+    print(f"规划后路径长度: {path_len:.2f} m")
 
     return path
 
 
 def calc_cost(n, goal, dist_map, config, cost_map=None,
               grid_resolution=0.1, x_min=0.0, y_min=0.0, is_start=False):
-    """计算节点的总代价"""
-    xind, yind = n.xind, n.yind
     current_x = n.xlist[-1]
     current_y = n.ylist[-1]
     current_yaw = n.yawlist[-1]
 
-    # 1. 障碍物启发式 (Holonomic / Dijkstra)
-    if dist_map:
-        h_dijkstra = dist_map.get((xind, yind), 
-                                  sqrt((current_x - goal[0]) ** 2 + (current_y - goal[1]) ** 2))
-    else:
-        h_dijkstra = sqrt((current_x - goal[0]) ** 2 + (current_y - goal[1]) ** 2)
+    h_dijkstra = 0.0
+    if dist_map is not None:
+        cg_x = int((current_x - x_min) / COARSE_GRID_RES)
+        cg_y = int((current_y - y_min) / COARSE_GRID_RES)
+        if 0 <= cg_y < dist_map.shape[0] and 0 <= cg_x < dist_map.shape[1]:
+             val = dist_map[cg_y, cg_x]
+             if val != np.inf: h_dijkstra = val
+             else: h_dijkstra = math.hypot(current_x - goal[0], current_y - goal[1])
+        else: h_dijkstra = math.hypot(current_x - goal[0], current_y - goal[1])
+    else: h_dijkstra = math.hypot(current_x - goal[0], current_y - goal[1])
         
-    # 2. 运动学启发式 (Non-holonomic / Reeds-Shepp)
-    # 为了性能，仅在接近目标或间隔一定步数时计算，这里为简单起见每次都算
-    # 使用 Reeds-Shepp 曲线长度作为启发式
-    # 注意：generate_path 比较耗时，这里只计算 Optimal Length
-    max_curvature = math.tan(MAX_STEER) / WB
-    
-    # 简单的 RS 估算（直接调用库计算 paths 并取最小长度）
-    # 优化：如果是起点或者接近终点才精确计算，或者间隔计算？
-    # 为了效果，我们接受一定计算量增加。
-    # 这里我们只取 generate_path 的结果 (Path 列表) 的最小 L
-    qs = [current_x, current_y, current_yaw]
-    qg = [goal[0], goal[1], goal[2]]
-    # 调用 rs.generate_path(q0, q1, maxc) -> returns list of Path
-    rs_paths = rs.generate_path(qs, qg, max_curvature)
-    if rs_paths:
-        h_rs = min([p.L for p in rs_paths])
+    h_rs = 0.0
+    if h_dijkstra < RS_HEURISTIC_DIST:
+        max_curvature = math.tan(MAX_STEER) / WB
+        qs = [current_x, current_y, current_yaw]
+        qg = [goal[0], goal[1], goal[2]]
+        rs_paths = rs.generate_path(qs, qg, max_curvature)
+        if rs_paths: h_rs = min([p.L for p in rs_paths])
+        else: h_rs = h_dijkstra
     else:
-        h_rs = h_dijkstra # Fallback
+        h_rs = h_dijkstra
 
-    # 综合启发式：取最大值 (max is admissible)
     h_cost = max(h_dijkstra, h_rs)
     
-    # 3. 障碍物代价 (从CostMap读取)
     obstacle_cost = 0.0
     if cost_map is not None:
-        x = xind * config.xy_resolution
-        y = yind * config.xy_resolution
-        px = math.floor((x - x_min) / grid_resolution)
-        py = math.floor((y - y_min) / grid_resolution)
+        px = int((current_x - x_min) / grid_resolution)
+        py = int((current_y - y_min) / grid_resolution)
         if 0 <= px < cost_map.shape[1] and 0 <= py < cost_map.shape[0]:
             obstacle_cost = cost_map[py, px]
 
-    # 4. 偏离直线代价 (Straight Deviation)
-    # 计算heading与目标方向的偏差，鼓励对齐目标
-    # 距离目标越远，越应该对齐 Goal
     goal_angle = math.atan2(goal[1] - current_y, goal[0] - current_x)
     angle_diff = abs(rs.pi_2_pi(goal_angle - current_yaw))
-    
-    # 简单策略：越接近目标，角度惩罚越重要？或者全程都很重要。
-    # 这里我们全程给一个偏离代价
     straight_cost = STRAIGHT_COST * angle_diff
 
     return n.cost + H_COST * h_cost + OBSTACLE_COST * obstacle_cost + straight_cost
 
-
 def get_final_path(closed, ngoal, nstart, config):
-    """从闭集中重构最终路径"""
     rx, ry, ryaw = list(reversed(ngoal.xlist)), list(reversed(ngoal.ylist)), list(reversed(ngoal.yawlist))
     direction = list(reversed(ngoal.directions))
     nid = ngoal.pind
     finalcost = ngoal.cost
-
     while nid:
         n = closed[nid]
-        if len(n.xlist) != len(n.directions):
-            n.directions = n.directions[:len(n.xlist)]
+        if len(n.xlist) != len(n.directions): n.directions = n.directions[:len(n.xlist)]
         rx.extend(list(reversed(n.xlist)))
         ry.extend(list(reversed(n.ylist)))
         ryaw.extend(list(reversed(n.yawlist)))
         direction.extend(list(reversed(n.directions)))
         nid = n.pind
-
     rx = list(reversed(rx))
     ry = list(reversed(ry))
     ryaw = list(reversed(ryaw))
     direction = list(reversed(direction))
-
-    if len(direction) != len(rx):
-        direction = direction[:len(rx)]
-    if len(direction) > 0:
-        direction[0] = nstart.directions[0]
-
+    if len(direction) != len(rx): direction = direction[:len(rx)]
+    if len(direction) > 0: direction[0] = nstart.directions[0]
     path = Path(rx, ry, ryaw, direction, finalcost)
     return path
 
-
 def verify_index(node, config):
-    """验证节点索引是否在有效范围内"""
     xind, yind, yawind = node.xind, node.yind, node.yawind
     return (config.minx <= xind <= config.maxx and
             config.miny <= yind <= config.maxy and
             config.minyaw <= yawind <= config.maxyaw)
 
-
 def calc_index(node, config):
-    """计算节点的唯一索引"""
     ind = ((node.yawind - config.minyaw) * config.xw * config.yw) + \
           ((node.yind - config.miny) * config.xw) + \
           (node.xind - config.minx)
-    if ind < 0:
-        return 0
+    if ind < 0: return 0
     return ind

@@ -1,13 +1,13 @@
 # 车辆轨迹规划与优化 Demo (Trajectory Planning & Optimization)
 
-本项目演示了 **混合 A* (Hybrid A*)** 结合 **轨迹优化 (Trajectory Optimization)** 算法在非结构化场景下的应用。
+本项目演示了 **改进的混合 A* (Hybrid A*)** 结合 **轨迹优化 (Trajectory Optimization)** 算法在非结构化场景下的应用。
 
 ## 核心算法
 
 1.  **路径规划**：Hybrid A* (改进版)
-    *   **启发式增强**：融合 2D Dijkstra (避障) 与 Reeds-Shepp (运动学) 启发式，大幅减少绕路。
-    *   **代价函数优化**：引入直线偏离惩罚与换挡/转向惩罚，生成更平滑、更直接的初值路径。
-    *   **解析扩展**：提升规划效率与末端精度。
+    *   **自适应栅格与多分辨率 (Adaptive Grid & Multi-resolution)**: 使用 coarse grid (1.0m) 快速引导搜索，fine grid (0.1m) 确保避障。
+    *   **自适应步长 (Adaptive Step Size)**: 空旷区域加速搜索，大幅提升规划速度（实测 45s -> <2s）。
+    *   **启发式增强**：融合 Reeds-Shepp 运动学启发式与偏离惩罚，避免绕路。
 2.  **后处理优化**：
     *   **DL-IAPS**: 双层迭代锚点路径平滑 (基于 SCP)。
     *   **PJSO**: 分段 Jerk 速度规划 (优化 $s, v, a$)。
@@ -40,7 +40,7 @@ pip install cvxpy  # 优化器核心依赖
 python3 run_demo.py
 ```
 
-程序将输出整个规划过程的日志信息。
+程序将输出整个规划过程的日志信息，包括规划后的路径长度和优化结果。
 
 ## 结果查看
 
@@ -48,7 +48,7 @@ python3 run_demo.py
 
 *   `output.json`: 包含优化后的轨迹点坐标 $(x, y, \theta)$ 、速度 $v$、加速度 $a$ 及曲率 $\kappa$。
 *   `output.jpg`: 静态可视化图，展示优化前后的轨迹对比以及速度/加速度曲线。
-*   `output.gif`: 动态生成过程动画。
+*   `output.gif`: 轨迹动态演示动画。
 
 ## 详细文档
 

@@ -5,9 +5,9 @@ git push                            # 3. 上传：推送到 GitHub
 
 版本管理
 git add .                           # 1. 收集：将所有修改添加到暂存区
-git commit -m "优化混合A*代码"        # 2. 存档：生成新版本
+git commit -m "增加自适应栅格大小"        # 2. 存档：生成新版本
 git log                             # 3.查看历史，确认最新 commit 没问题
-git tag -a v2.1 -m "优化混合A*代码"       # 4.给“当前的最新提交”贴上标签
+git tag -a v2.1 -m "增加自适应栅格大小"       # 4.给“当前的最新提交”贴上标签
 git push origin v2.1                # 5.单独推送这个标签到远程
 
 版本回退
