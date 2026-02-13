@@ -4,6 +4,7 @@
 ===================================
 基于混合A*算法，从 input/ 加载地图、障碍物和场景配置，
 规划车辆从起点到停车位的完整轨迹，
+并使用 Trajopt (DL-IAPS + PJSO) 进行轨迹平滑和速度规划。
 输出 output.json / output.jpg / output.gif。
 """
 
@@ -26,7 +27,7 @@ sys.path.insert(0, ROOT)
 
 from planner.hybrid_a_star import hybrid_a_star_planning, Config
 from planner.collision_lookup import CollisionLookup
-from optimizer.recursive_mpc import RecursiveMPCOptimizer
+from optimizer.trajectory_optimizer import TrajectoryOptimizer
 
 # ── 中文字体 ──────────────────────────────────────
 FONT_PATH = "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
@@ -138,27 +139,34 @@ def calculate_curvatures(path_x, path_y, path_yaw):
 #  4. 输出 JSON
 # ===========================================================================
 
-def save_output_json(path, path_x, path_y, path_yaw, directions, curvatures,
-                     iter_num, search_time):
+def save_output_json(path, trajectory, planning_info):
+    path_x = trajectory['x']
+    path_y = trajectory['y']
+    path_yaw = trajectory['yaw']
+    path_v = trajectory.get('v')
+    path_a = trajectory.get('a')
+    curvatures = calculate_curvatures(path_x, path_y, path_yaw)
+    
     data = {
-        "planning_info": {
-            "algorithm": "Hybrid A* + Reeds-Shepp",
-            "iterations": iter_num,
-            "search_time_sec": round(search_time, 3),
-            "path_length": len(path_x),
-        },
+        "planning_info": planning_info,
         "trajectory": []
     }
     for i in range(len(path_x)):
-        data["trajectory"].append({
+        point = {
             "index": i,
             "x": round(path_x[i], 4),
             "y": round(path_y[i], 4),
             "yaw_rad": round(path_yaw[i], 4),
             "yaw_deg": round(math.degrees(path_yaw[i]), 2),
-            "direction": "前进" if directions[i] else "倒车",
             "curvature": round(curvatures[i], 6)
-        })
+        }
+        if path_v is not None:
+             point["v"] = round(path_v[i], 4)
+        if path_a is not None:
+             point["a"] = round(path_a[i], 4)
+             
+        data["trajectory"].append(point)
+        
     with open(path, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     print(f"轨迹数据已保存至: {path}")
@@ -253,58 +261,84 @@ def setup_plot(ax, map_cfg, obstacles, scenario, title, grid_map=None):
 # ===========================================================================
 
 def save_output_jpg(path, map_cfg, obstacles, scenario, grid_map,
-                    path_x, path_y, path_yaw, directions,
-                    orig_path=None):
+                    trajectory, orig_path=None):
     """保存规划结果静态图（orig_path 为优化前轨迹，用于对比显示）"""
-    fig, ax = plt.subplots(1, 1, figsize=(16, 10), dpi=150)
+    
+    # 创建 2x2 子图布局来展示速度/加速度
+    fig = plt.figure(figsize=(18, 12), dpi=150)
+    gs = fig.add_gridspec(2, 2, height_ratios=[3, 1])
+    
+    # 主图：轨迹
+    ax_main = fig.add_subplot(gs[0, :])
+    
+    # 速度曲线
+    ax_v = fig.add_subplot(gs[1, 0])
+    
+    # 加速度曲线
+    ax_a = fig.add_subplot(gs[1, 1])
+    
     fig.patch.set_facecolor('#1a1a2e')
-    ax.set_facecolor('#16213e')
+    for ax in [ax_main, ax_v, ax_a]:
+        ax.set_facecolor('#16213e')
 
-    setup_plot(ax, map_cfg, obstacles, scenario,
+    # --- 绘制主图 ---
+    setup_plot(ax_main, map_cfg, obstacles, scenario,
                '非结构道路车辆轨迹规划与泊车演示', grid_map)
 
+    path_x = trajectory['x']
+    path_y = trajectory['y']
+    path_yaw = trajectory['yaw']
+    path_v = trajectory.get('v', [0]*len(path_x))
+    
     # 轨迹 — 按方向分色
     for i in range(len(path_x) - 1):
-        color = '#00ff88' if directions[i] else '#ff6b6b'
-        ax.plot(path_x[i:i + 2], path_y[i:i + 2], color=color,
+        # 根据速度判断方向，或者根据 direction 字段（如果保留的话）
+        # 这里简单起见，如果 v > 0 前进， v < 0 倒车
+        is_forward = path_v[i] >= 0
+        color = '#00ff88' if is_forward else '#ff6b6b'
+        ax_main.plot(path_x[i:i + 2], path_y[i:i + 2], color=color,
                 linewidth=2.0, alpha=0.9, zorder=3)
 
     # 起点车辆
     sx, sy = scenario['start']['x'], scenario['start']['y']
     syaw = math.radians(scenario['start']['yaw_deg'])
-    draw_vehicle(ax, sx, sy, syaw, color='#00b4d8', alpha=0.9, label='起始位置')
+    draw_vehicle(ax_main, sx, sy, syaw, color='#00b4d8', alpha=0.9, label='起始位置')
 
     # 终点车辆
     gx, gy = scenario['goal']['x'], scenario['goal']['y']
     gyaw = math.radians(scenario['goal']['yaw_deg'])
-    draw_vehicle(ax, gx, gy, gyaw, color='#e63946', alpha=0.9, label='目标位置')
+    draw_vehicle(ax_main, gx, gy, gyaw, color='#e63946', alpha=0.9, label='目标位置')
 
     # 方向图例
-    ax.plot([], [], color='#00ff88', linewidth=2.5, label='前进轨迹')
-    ax.plot([], [], color='#ff6b6b', linewidth=2.5, label='倒车轨迹')
+    ax_main.plot([], [], color='#00ff88', linewidth=2.5, label='前进轨迹')
+    ax_main.plot([], [], color='#ff6b6b', linewidth=2.5, label='倒车轨迹')
 
     # 优化前轨迹（白色虚线对比）
     if orig_path is not None:
         ox, oy = orig_path
-        ax.plot(ox, oy, color='#ffffff', linewidth=1.0, alpha=0.35,
-                linestyle='--', zorder=2, label='优化前轨迹')
+        ax_main.plot(ox, oy, color='#ffffff', linewidth=1.0, alpha=0.35,
+                linestyle='--', zorder=2, label='优化前轨迹 (Hybrid A*)')
 
-    legend = ax.legend(loc='upper left', prop=FONT_PROP_LEGEND,
+    legend = ax_main.legend(loc='upper left', prop=FONT_PROP_LEGEND,
                        facecolor='#1a1a2e', edgecolor='white',
                        labelcolor='white', framealpha=0.8)
-
-    # 信息框
-    import planner.hybrid_a_star as ha
-    info_text = (f"算法: 混合A* + Reeds-Shepp\n"
-                 f"迭代次数: {ha.LAST_ITER_NUM}\n"
-                 f"搜索用时: {ha.LAST_SEARCH_TIME:.2f}秒\n"
-                 f"路径点数: {len(path_x)}")
-    ax.text(0.98, 0.02, info_text, transform=ax.transAxes,
-            fontproperties=FONT_PROP_SMALL, color='white',
-            ha='right', va='bottom',
-            bbox=dict(boxstyle='round,pad=0.5', facecolor='#0f3460',
-                      edgecolor='white', alpha=0.85),
-            fontsize=9, zorder=10)
+    
+    # --- 绘制速度/加速度曲线 ---
+    t = trajectory.get('t', range(len(path_x)))
+    v = trajectory.get('v', [0]*len(path_x))
+    a = trajectory.get('a', [0]*len(path_x))
+    
+    # 速度图
+    ax_v.plot(t, v, color='#00ff88', linewidth=2)
+    ax_v.set_title("速度 Profile (m/s)", fontproperties=FONT_PROP, color='white')
+    ax_v.grid(True, alpha=0.2)
+    ax_v.tick_params(colors='white')
+    
+    # 加速度图
+    ax_a.plot(t, a, color='#f72585', linewidth=2)
+    ax_a.set_title("加速度 Profile (m/s^2)", fontproperties=FONT_PROP, color='white')
+    ax_a.grid(True, alpha=0.2)
+    ax_a.tick_params(colors='white')
 
     plt.tight_layout()
     fig.savefig(path, bbox_inches='tight', facecolor=fig.get_facecolor())
@@ -317,8 +351,13 @@ def save_output_jpg(path, map_cfg, obstacles, scenario, grid_map,
 # ===========================================================================
 
 def save_output_gif(path, map_cfg, obstacles, scenario, grid_map,
-                    path_x, path_y, path_yaw, directions):
+                    trajectory):
     """保存规划过程动画 GIF"""
+    path_x = trajectory['x']
+    path_y = trajectory['y']
+    path_yaw = trajectory['yaw']
+    path_v = trajectory.get('v', [0]*len(path_x))
+    
     n = len(path_x)
     # 每隔几帧采样以控制帧数
     step = max(1, n // 80)
@@ -342,7 +381,8 @@ def save_output_gif(path, map_cfg, obstacles, scenario, grid_map,
 
         # 已走过的轨迹
         for j in range(i):
-            color = '#00ff88' if directions[j] else '#ff6b6b'
+            is_fwd = path_v[j] >= 0
+            color = '#00ff88' if is_fwd else '#ff6b6b'
             ax.plot(path_x[j:j + 2], path_y[j:j + 2], color=color,
                     linewidth=1.8, alpha=0.7, zorder=3)
 
@@ -354,19 +394,25 @@ def save_output_gif(path, map_cfg, obstacles, scenario, grid_map,
                 color='#00b4d8', fontsize=10, zorder=4)
 
         # 当前车辆
+        is_fwd_now = path_v[i] >= 0
         draw_vehicle(ax, path_x[i], path_y[i], path_yaw[i],
-                     color='#f72585' if not directions[i] else '#4cc9f0',
+                     color='#f72585' if not is_fwd_now else '#4cc9f0',
                      alpha=0.95)
 
         # 方向提示
-        dir_text = '前进中' if directions[i] else '倒车中'
-        dir_color = '#00ff88' if directions[i] else '#ff6b6b'
+        dir_text = '前进中' if is_fwd_now else '倒车中'
+        dir_color = '#00ff88' if is_fwd_now else '#ff6b6b'
         ax.text(0.02, 0.02, dir_text, transform=ax.transAxes,
                 fontproperties=FONT_PROP, color=dir_color,
                 fontsize=14, fontweight='bold',
                 bbox=dict(boxstyle='round,pad=0.4', facecolor='#0f3460',
                           edgecolor=dir_color, alpha=0.9),
                 zorder=10)
+        
+        # 速度显示
+        ax.text(0.02, 0.08, f"速度: {path_v[i]:.2f} m/s", transform=ax.transAxes,
+                fontproperties=FONT_PROP, color='white', fontsize=12, zorder=10)
+
 
         # 进度条
         progress = (i + 1) / n
@@ -402,7 +448,7 @@ def save_output_gif(path, map_cfg, obstacles, scenario, grid_map,
 def main():
     print("=" * 60)
     print("  非结构道路车辆轨迹规划与泊车 Demo")
-    print("  算法: 混合A* + Reeds-Shepp")
+    print("  算法: 混合A* + DL-IAPS & PJSO 优化")
     print("=" * 60)
 
     input_dir = os.path.join(ROOT, 'input')
@@ -475,40 +521,33 @@ def main():
     orig_x = list(path.xlist)
     orig_y = list(path.ylist)
 
-    # 5. 递归MPC轨迹优化
-    print("\n[5/7] 递归MPC轨迹优化...")
-    optimizer = RecursiveMPCOptimizer({
-        'horizon': 40,
-        'overlap': 15,
-        'w_reference': 1.0,
-        'w_smooth': 60.0,
-        'w_jerk': 80.0,
-        'w_obstacle': 500.0,
-        'obstacle_margin': 2.0,
-        'max_iter': 8,
-        'fix_start_n': 5,
-        'fix_end_n': 5,
-    })
-    opt_x, opt_y, opt_yaw = optimizer.optimize(
-        path.xlist, path.ylist, path.yawlist, path.directionlist,
-        grid_map, map_cfg
-    )
+    # 5. 轨迹优化 (Trajectory Optimization)
+    print("\n[5/7] 轨迹优化 (DL-IAPS & PJSO)...")
+    optimizer = TrajectoryOptimizer()
+    optimized_trajectory = optimizer.optimize(path, collision_lookup)
+
 
     # 6. 计算曲率 & 输出
     print("\n[6/7] 保存结果...")
-    curvatures = calculate_curvatures(opt_x, opt_y, opt_yaw)
-
     import planner.hybrid_a_star as ha
+    
+    planning_info = {
+         "algorithm": "Hybrid A* + DL-IAPS & PJSO",
+         "iterations": ha.LAST_ITER_NUM,
+         "search_time_sec": round(ha.LAST_SEARCH_TIME, 3),
+         "path_length": len(optimized_trajectory['x']),
+    }
+    
     save_output_json(
         os.path.join(output_dir, 'output.json'),
-        opt_x, opt_y, opt_yaw, path.directionlist, curvatures,
-        ha.LAST_ITER_NUM, ha.LAST_SEARCH_TIME
+        optimized_trajectory,
+        planning_info
     )
 
     save_output_jpg(
         os.path.join(output_dir, 'output.jpg'),
         map_cfg, obstacles, scenario, grid_map,
-        opt_x, opt_y, opt_yaw, path.directionlist,
+        optimized_trajectory,
         orig_path=(orig_x, orig_y)
     )
 
@@ -517,7 +556,7 @@ def main():
     save_output_gif(
         os.path.join(output_dir, 'output.gif'),
         map_cfg, obstacles, scenario, grid_map,
-        opt_x, opt_y, opt_yaw, path.directionlist
+        optimized_trajectory
     )
 
     print("\n" + "=" * 60)
